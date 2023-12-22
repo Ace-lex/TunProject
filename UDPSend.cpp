@@ -44,12 +44,12 @@ int main() {
                 (const struct sockaddr *) &servaddr, len);
         fprintf(stdout, "message: %s have sent.\n", buffer);
         fflush(stdout);
-        // int n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL, 
-        //             (struct sockaddr *) &servaddr, &len);
-        // buffer[n] = '\0';
-        // printf("Server : %s\n", buffer);   
+        int n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL, 
+                    (struct sockaddr *) &servaddr, &len);
+        buffer[n] = '\0';
+        printf("Server : %s\n", buffer);   
     }
-  
+
     close(sockfd);
     return 0;
 }
