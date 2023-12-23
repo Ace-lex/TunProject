@@ -160,7 +160,8 @@ int main( int argc, char * argv[ ] )
         FILE *fp;
         fp=fopen(name,"rb");
         fread(message,1,payloadLen,fp);
-        
+        fclose(fp);
+
         *(unsigned short*)&buf[0]=0x0045;
         *(unsigned short*)&buf[4]=0xaabb;
         *(unsigned short*)&buf[6]=0x0040;

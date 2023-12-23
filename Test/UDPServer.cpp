@@ -73,6 +73,7 @@ int main() {
         fp=fopen(name,"rb");
         fileLen=file_size(name);
         fread(example,1,fileLen,fp);
+        fclose(fp);
         assert(n==fileLen);
         for(int j=0;j<fileLen;j++)
         {

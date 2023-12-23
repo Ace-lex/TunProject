@@ -9,17 +9,29 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <assert.h>
+#include <sys/types.h> 
+#include <sys/stat.h> 
  
 #define PORT 8080
 #define MAXLINE 1024
   
+int file_size(char* filename) 
+{ 
+  struct stat statbuf; 
+  stat(filename,&statbuf); 
+  int size=statbuf.st_size; 
+ 
+  return size; 
+}
+
 // Driver code
-int main() {
+int main(int argc, char * argv[ ]) {
     int sockfd;
     char buffer[MAXLINE];
     char *hello = "Hello from client";
     struct sockaddr_in     servaddr;
-  
+    int payloadLen;
+
     // Creating socket file descriptor
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
         perror("socket creation failed");
@@ -36,12 +48,20 @@ int main() {
     socklen_t len = (socklen_t)sizeof(servaddr);  //len is value/resuslt
   
     // send msg
-    while (fgets(buffer, MAXLINE, stdin) != NULL) {
-        int i = strlen(buffer);
-        if (buffer[i - 1] == '\n') {
-            buffer[i - 1] = 0;
+    while (1) {
+        if(argc==1)
+        {
+            fgets(buffer, MAXLINE, stdin);
+            payloadLen = strlen(buffer);
         }
-        sendto(sockfd, (const char *)buffer, strlen(buffer), 0, 
+        else
+        {
+            FILE *fp=fopen(argv[1],"rb");
+            payloadLen=file_size(argv[1]);
+            fread(buffer,1,payloadLen,fp);
+            fclose(fp);
+        }
+        sendto(sockfd, (const char *)buffer, payloadLen, 0, 
                 (const struct sockaddr *) &servaddr, len);
         fprintf(stdout, "message: %s have sent.\n", buffer);
         fflush(stdout);

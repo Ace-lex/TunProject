@@ -118,6 +118,7 @@ uint16_t calculateIPChecksum(const uint8_t* ipHeader, size_t headerLength) {
 void PrintPayload(unsigned char *udpPayload,int payloadLen)
 {
     int i;
+    printf("payload is ");
     for(i=0;i<payloadLen;i++)
     {
         printf("%c",udpPayload[i]);
@@ -165,7 +166,7 @@ int main( int argc, char * argv[ ] )
         memset(message,0,sizeof(message));
         if(argc<2)
         {
-            sprintf(message,"reply by tu");
+            sprintf(message,"reply by tun");
             payloadLen=strlen(message);
         }
         else{
@@ -173,6 +174,7 @@ int main( int argc, char * argv[ ] )
             FILE *fp;
             fp=fopen(argv[1],"rb");
             fread(message,1,payloadLen,fp);
+            fclose(fp);
         } 
         ret = read ( tun, buf, sizeof ( buf) ) ; 
         if ( ret < 0) 
@@ -186,8 +188,8 @@ int main( int argc, char * argv[ ] )
         //printf("%d\n",protocal);
         if(protocal==17)
         {
-            printf("Received udp packet, source port is %d, payload is ",*((unsigned short*)&buf[20]));
-            PrintPayload(buf+28,buf[24]*256+buf[25]-8);
+            printf("Received udp packet, source port is %d, payload size is %d, ",*(unsigned short*)&buf[20],buf[24]*256+buf[25]-8);
+            //PrintPayload(buf+28,buf[24]*256+buf[25]-8);
             convertIpToByteArray("10.10.10.1",ip);
             memcpy(&buf[16],&buf[12],4);
             memcpy(&buf[12],ip,4);
