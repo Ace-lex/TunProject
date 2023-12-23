@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <assert.h>
  
 #define PORT 8080
 #define MAXLINE 1024
@@ -45,9 +46,10 @@ int main() {
         fprintf(stdout, "message: %s have sent.\n", buffer);
         fflush(stdout);
         int n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL, 
-                    (struct sockaddr *) &servaddr, &len);
+                    (struct sockaddr *) &servaddr, &len);//收到信息便说明格式正确
         buffer[n] = '\0';
-        printf("Server : %s\n", buffer);   
+        printf("Server : %s\n", buffer);  
+        //assert(!strcmp(buffer,"reply by tu"));
     }
 
     close(sockfd);
