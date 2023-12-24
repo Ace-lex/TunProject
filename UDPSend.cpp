@@ -1,4 +1,3 @@
-// Client side implementation of UDP client-server model
  
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +14,7 @@
 #define PORT 8080
 #define MAXLINE 1024
   
-int file_size(char* filename) 
+int fileSize(char* filename) 
 { 
   struct stat statbuf; 
   stat(filename,&statbuf); 
@@ -24,15 +23,15 @@ int file_size(char* filename)
   return size; 
 }
 
-// Driver code
-int main(int argc, char * argv[ ]) {
+int main(int argc, char * argv[ ]) 
+{
     int sockfd;
     char buffer[MAXLINE];
     char *hello = "Hello from client";
     struct sockaddr_in     servaddr;
     int payloadLen;
 
-    // Creating socket file descriptor
+    // 创建socket文件描述符
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
         perror("socket creation failed");
         exit(EXIT_FAILURE);
@@ -40,15 +39,16 @@ int main(int argc, char * argv[ ]) {
     //printf("socket successfully built\n");
     memset(&servaddr, 0, sizeof(servaddr));
       
-    // Filling server information
+    // 填充服务端信息
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(PORT);
     servaddr.sin_addr.s_addr = inet_addr("10.10.10.1");
       
     socklen_t len = (socklen_t)sizeof(servaddr);  //len is value/resuslt
   
-    // send msg
-    while (1) {
+    // 发送消息
+    while (1) 
+    {
         if(argc==1)
         {
             fgets(buffer, MAXLINE, stdin);
@@ -57,7 +57,7 @@ int main(int argc, char * argv[ ]) {
         else
         {
             FILE *fp=fopen(argv[1],"rb");
-            payloadLen=file_size(argv[1]);
+            payloadLen=fileSize(argv[1]);
             fread(buffer,1,payloadLen,fp);
             fclose(fp);
         }

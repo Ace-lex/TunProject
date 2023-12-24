@@ -33,7 +33,7 @@ void convertIpToByteArray(const char *ipAddress,unsigned char *byteArray) {
 
 }
 
-int file_size(char* filename) 
+int fileSize(char* filename) 
 { 
   struct stat statbuf; 
   stat(filename,&statbuf); 
@@ -44,7 +44,7 @@ int file_size(char* filename)
 
 
 
-int tun_create(char *dev, int flags)
+int tunCreate(char *dev, int flags)
 {
      struct ifreq ifr;
      int fd, err;
@@ -68,7 +68,8 @@ int tun_create(char *dev, int flags)
 }
 
 // 计算UDP校验和
-uint16_t calculateUDPChecksum(uint8_t* udpPacket, size_t udpLength) {
+uint16_t calculateUDPChecksum(uint8_t* udpPacket, size_t udpLength) 
+{
     // 如果UDP数据包长度为奇数，则添加一个零字节
     if (udpLength % 2 != 0) {
         udpLength++;
@@ -95,7 +96,8 @@ uint16_t calculateUDPChecksum(uint8_t* udpPacket, size_t udpLength) {
 }
 
 //计算IP头部校验和
-uint16_t calculateIPChecksum(const uint8_t* ipHeader, size_t headerLength) {
+uint16_t calculateIPChecksum(const uint8_t* ipHeader, size_t headerLength) 
+{
     uint32_t sum = 0;
 
     // 将16位字节对相加
@@ -115,7 +117,7 @@ uint16_t calculateIPChecksum(const uint8_t* ipHeader, size_t headerLength) {
     return checksum;
 }
 
-void PrintPayload(unsigned char *udpPayload,int payloadLen)
+void printPayload(unsigned char *udpPayload,int payloadLen)
 {
     int i;
     printf("payload is ");
@@ -127,7 +129,7 @@ void PrintPayload(unsigned char *udpPayload,int payloadLen)
     printf("\n");
 }
 
-void PrintUDP(unsigned char *udpPacket,int udpLen)
+void printUDP(unsigned char *udpPacket,int udpLen)
 {
     int i;
     for(i=0;i<udpLen;i++)
@@ -141,18 +143,19 @@ void PrintUDP(unsigned char *udpPacket,int udpLen)
 int main( int argc, char * argv[ ] ) 
 { 
     int tun, ret; 
-    char tun_name[ IFNAMSIZ] ; 
-    unsigned char buf[ 4096] ;
+    char tunName[IFNAMSIZ] ; 
+    unsigned char buf[4096] ;
  
-    tun_name[ 0] = '\0' ; 
-    tun = tun_create( tun_name, IFF_TUN | IFF_NO_PI) ; 
+    tunName[0] = '\0' ; 
+    tun = tunCreate( tunName, IFF_TUN | IFF_NO_PI) ; 
     if ( tun < 0) { 
         perror ( "tun_create" ) ; 
         return 1; 
     } 
-    printf ( "TUN name is %s\n" , tun_name) ;
+    printf ( "TUN name is %s\n" , tunName) ;
     fflush(stdout);
-    while ( 1) { 
+    while (1) 
+    { 
         unsigned char ip[ 4] ;
         unsigned char port[2];
         unsigned short udpLen;
@@ -169,8 +172,9 @@ int main( int argc, char * argv[ ] )
             sprintf(message,"reply by tun");
             payloadLen=strlen(message);
         }
-        else{
-            payloadLen=file_size(argv[1]);
+        else
+        {
+            payloadLen=fileSize(argv[1]);
             FILE *fp;
             fp=fopen(argv[1],"rb");
             fread(message,1,payloadLen,fp);
@@ -180,8 +184,8 @@ int main( int argc, char * argv[ ] )
         if ( ret < 0) 
             break ;
         protocal=buf[9];
-        memcpy ( ip, & buf[ 12] , 4) ;
-        printf ( "read %d bytes " , ret) ; 
+        memcpy(ip,&buf[ 12],4) ;
+        printf ("read %d bytes", ret) ; 
         fflush(stdout);
         printf("from %d.%d.%d.%d\n",ip[0],ip[1],ip[2],ip[3]);
         fflush(stdout);
@@ -189,16 +193,16 @@ int main( int argc, char * argv[ ] )
         if(protocal==17)
         {
             printf("Received udp packet, source port is %d, payload size is %d, ",*(unsigned short*)&buf[20],buf[24]*256+buf[25]-8);
-            //PrintPayload(buf+28,buf[24]*256+buf[25]-8);
+            //printPayload(buf+28,buf[24]*256+buf[25]-8);
             convertIpToByteArray("10.10.10.1",ip);
             memcpy(&buf[16],&buf[12],4);
             memcpy(&buf[12],ip,4);
             *(unsigned short*)&buf[4]=0xaabb;
         
             //UDP头部      
-            memcpy ( port, & buf[ 20] , 2) ; 
-            memcpy ( & buf[ 20] , & buf[ 22] , 2) ; 
-            memcpy ( & buf[ 22] , port, 2) ;
+            memcpy (port,&buf[20],2) ; 
+            memcpy (&buf[ 20],&buf[22],2) ; 
+            memcpy (&buf[ 22],port,2) ;
             udpLen=8+payloadLen;
             *((unsigned short*)&buf[24])=udpLen;
             std::swap(buf[24],buf[25]);
@@ -216,7 +220,7 @@ int main( int argc, char * argv[ ] )
             udpCheckSum=calculateUDPChecksum(udpPacket,udpLen+12);
             *((unsigned short*)&buf[26])=udpCheckSum;
             std::swap(buf[26],buf[27]);
-            //PrintUDP(buf+20,udpLen);
+            //printUDP(buf+20,udpLen);
 
             *(unsigned short*)&buf[2]=20+udpLen;
             std::swap(buf[2],buf[3]);
@@ -229,11 +233,6 @@ int main( int argc, char * argv[ ] )
             fflush(stdout);
         } 
         
-        //  buf[ 20] = 0; 
-        // * ( ( unsigned short * ) & buf[ 22] )  = * ( ( unsigned short * ) & buf[ 22] )+8; 
-        // ret = write ( tun, buf, ret) ; 
-        // printf ( "write %d bytes\n" , ret) ; 
-        // fflush(stdout);
     } 
  
     return 0; 

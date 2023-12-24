@@ -1,4 +1,3 @@
-// Server side implementation of UDP client-server model
  
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +14,7 @@
 #define PORT    4791
 #define MAXLINE 4096
 
-int file_size(char* filename) 
+int fileSize(char* filename) 
 { 
   struct stat statbuf; 
   stat(filename,&statbuf); 
@@ -24,8 +23,9 @@ int file_size(char* filename)
   return size; 
 }
 
-// Driver code
-int main() {
+
+int main() 
+{
     int sockfd;
     unsigned char buffer[MAXLINE];
     char sendbuffer[MAXLINE];
@@ -33,8 +33,9 @@ int main() {
     struct sockaddr_in servaddr, cliaddr;
     char name[100];
       
-    // Creating socket file descriptor
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+    // 创建socket文件描述符
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) 
+    {
         perror("socket creation failed");
         exit(EXIT_FAILURE);
     }
@@ -42,12 +43,12 @@ int main() {
     memset(&servaddr, 0, sizeof(servaddr));
     memset(&cliaddr, 0, sizeof(cliaddr));
       
-    // Filling server information
+    // 填充服务端信息
     servaddr.sin_family    = AF_INET; // IPv4
     servaddr.sin_addr.s_addr = INADDR_ANY;
     servaddr.sin_port = htons(PORT);
       
-    // Bind the socket with the server address
+    // 绑定
     if ( bind(sockfd, (const struct sockaddr *)&servaddr, 
             sizeof(servaddr)) < 0 )
     {
@@ -60,7 +61,8 @@ int main() {
   
  
  
-    for (;;) {
+    for (;;) 
+    {
         memset(example,0,sizeof(example));
         n = recvfrom(sockfd, buffer, MAXLINE, 
                     MSG_WAITALL, ( struct sockaddr *) &cliaddr,

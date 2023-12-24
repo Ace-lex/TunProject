@@ -17,7 +17,8 @@
 #include <cstdlib>
 
 //IP地址转为16进制表示
-void convertIpToByteArray(const char *ipAddress,unsigned char *byteArray) {
+void convertIpToByteArray(const char *ipAddress,unsigned char *byteArray) 
+{
     struct in_addr addr;
 
     // 将IP地址字符串转换为网络地址结构
@@ -34,7 +35,7 @@ void convertIpToByteArray(const char *ipAddress,unsigned char *byteArray) {
 
 }
 
-int file_size(char* filename) 
+int fileSize(char* filename) 
 { 
   struct stat statbuf; 
   stat(filename,&statbuf); 
@@ -43,7 +44,7 @@ int file_size(char* filename)
   return size; 
 }
 
-int tun_create(char *dev, int flags)
+int tunCreate(char *dev, int flags)
 {
      struct ifreq ifr;
      int fd, err;
@@ -57,7 +58,8 @@ int tun_create(char *dev, int flags)
      ifr.ifr_flags |= flags;
      if (*dev != '\0')
          strncpy(ifr.ifr_name, dev, IFNAMSIZ);
-     if ((err = ioctl(fd, TUNSETIFF, (void *)&ifr)) < 0) {
+     if ((err = ioctl(fd, TUNSETIFF, (void *)&ifr)) < 0) 
+     {
          close(fd);
          return err;
      }
@@ -67,9 +69,11 @@ int tun_create(char *dev, int flags)
 }
 
 // 计算UDP校验和
-uint16_t calculateUDPChecksum(uint8_t* udpPacket, size_t udpLength) {
+uint16_t calculateUDPChecksum(uint8_t* udpPacket, size_t udpLength) 
+{
     // 如果UDP数据包长度为奇数，则添加一个零字节
-    if (udpLength % 2 != 0) {
+    if (udpLength % 2 != 0) 
+    {
         udpLength++;
         udpPacket[12+udpLength]='\0';
     }
@@ -77,13 +81,15 @@ uint16_t calculateUDPChecksum(uint8_t* udpPacket, size_t udpLength) {
     uint32_t sum = 0;
 
     // 将16位字节对相加
-    for (size_t i = 0; i < udpLength; i += 2) {
+    for (size_t i = 0; i < udpLength; i += 2) 
+    {
         uint16_t word = (udpPacket[i] << 8) + udpPacket[i + 1];
         sum += word;
     }
 
     // 将进位加到低16位
-    while (sum >> 16) {
+    while (sum >> 16) 
+    {
         sum = (sum & 0xFFFF) + (sum >> 16);
     }
 
@@ -94,17 +100,20 @@ uint16_t calculateUDPChecksum(uint8_t* udpPacket, size_t udpLength) {
 }
 
 //计算IP头部校验和
-uint16_t calculateIPChecksum(const uint8_t* ipHeader, size_t headerLength) {
+uint16_t calculateIPChecksum(const uint8_t* ipHeader, size_t headerLength) 
+{
     uint32_t sum = 0;
 
     // 将16位字节对相加
-    for (size_t i = 0; i < headerLength; i += 2) {
+    for (size_t i = 0; i < headerLength; i += 2) 
+    {
         uint16_t word = (ipHeader[i] << 8) + ipHeader[i + 1];
         sum += word;
     }
 
     // 将进位加到低16位
-    while (sum >> 16) {
+    while (sum >> 16) 
+    {
         sum = (sum & 0xFFFF) + (sum >> 16);
     }
 
@@ -114,7 +123,7 @@ uint16_t calculateIPChecksum(const uint8_t* ipHeader, size_t headerLength) {
     return checksum;
 }
 
-void PrintUDP(unsigned char *udpPacket,int udpLen)
+void printUDP(unsigned char *udpPacket,int udpLen)
 {
     int i;
     for(i=0;i<udpLen;i++)
@@ -128,20 +137,22 @@ void PrintUDP(unsigned char *udpPacket,int udpLen)
 int main( int argc, char * argv[ ] ) 
 { 
     int tun, ret; 
-    char tun_name[ IFNAMSIZ] ; 
+    char tunName[ IFNAMSIZ] ; 
     unsigned char buf[ 4096] ;
  
-    tun_name[ 0] = '\0' ; 
-    tun = tun_create( tun_name, IFF_TUN | IFF_NO_PI) ; 
-    if ( tun < 0) { 
-        perror ( "tun_create" ) ; 
+    tunName[ 0] = '\0' ; 
+    tun = tunCreate( tunName, IFF_TUN | IFF_NO_PI) ; 
+    if ( tun < 0) 
+    { 
+        perror ( "tunCreate" ) ; 
         return 1; 
     } 
-    printf ( "TUN name is %s\n" , tun_name) ; 
+    printf ( "TUN name is %s\n" , tunName) ; 
     fflush(stdout);
     system("./script.sh");
     
-    for(int i=0;i<3;i++) { 
+    for(int i=0;i<3;i++) 
+    { 
         unsigned char sip[ 4] ;
         unsigned char dip[ 4] ;
         unsigned char port[2];
@@ -156,7 +167,7 @@ int main( int argc, char * argv[ ] )
         memset(message,0,sizeof(message));
 
         sprintf(name,"%s%d","test",i);
-        payloadLen=file_size(name);
+        payloadLen=fileSize(name);
         FILE *fp;
         fp=fopen(name,"rb");
         fread(message,1,payloadLen,fp);
@@ -188,12 +199,11 @@ int main( int argc, char * argv[ ] )
         *(unsigned short*)&udpPacket[8]=0x1100;
         memcpy(udpPacket+10,buf+24,2);
         memcpy(udpPacket+12,buf+20,udpLen);
-        // printf("before checksum, udpLen=%d\n",udpLen);
-        // fflush(stdout);
+
         udpCheckSum=calculateUDPChecksum(udpPacket,udpLen+12);
         *((unsigned short*)&buf[26])=udpCheckSum;
         std::swap(buf[26],buf[27]);
-        //PrintUDP(buf+20,udpLen);
+        //printUDP(buf+20,udpLen);
 
         *(unsigned short*)&buf[2]=20+udpLen;
         std::swap(buf[2],buf[3]);
@@ -205,11 +215,6 @@ int main( int argc, char * argv[ ] )
         printf ( "write %d bytes\n" , ret) ; 
         fflush(stdout);
         sleep(1);
-        //  buf[ 20] = 0; 
-        // * ( ( unsigned short * ) & buf[ 22] )  = * ( ( unsigned short * ) & buf[ 22] )+8; 
-        // ret = write ( tun, buf, ret) ; 
-        // printf ( "write %d bytes\n" , ret) ; 
-        // fflush(stdout);
     } 
  
     return 0; 
