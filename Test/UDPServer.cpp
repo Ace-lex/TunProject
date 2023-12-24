@@ -24,7 +24,8 @@ int fileSize(char* filename)
 }
 
 
-int main() {
+int main() 
+{
     int sockfd;
     unsigned char buffer[MAXLINE];
     char sendbuffer[MAXLINE];
@@ -33,7 +34,8 @@ int main() {
     char name[100];
       
     // socket文件描述符
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) 
+    {
         perror("socket creation failed");
         exit(EXIT_FAILURE);
     }

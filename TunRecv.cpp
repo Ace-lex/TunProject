@@ -16,7 +16,8 @@
 #include <arpa/inet.h>
 
 //IP地址转为16进制表示
-void convertIpToByteArray(const char *ipAddress,unsigned char *byteArray) {
+void convertIpToByteArray(const char *ipAddress,unsigned char *byteArray) 
+{
     struct in_addr addr;
 
     // 将IP地址字符串转换为网络地址结构
