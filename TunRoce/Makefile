@@ -1,0 +1,12 @@
+APPS = RoceSend UDPServer
+all : $(APPS)
+
+clean:
+	$(foreach fname,${APPS}, rm -f ${fname})
+
+RoceSend:clean
+		g++ RoceSend.cpp -o RoceSend
+UDPServer:clean
+		g++ UDPServer.cpp -o UDPServer
+
+.PHONY: all clean
