@@ -18,6 +18,24 @@
 #include <cstring>
 #include <iostream>
 
+#define IPID 0xaabb
+#define FGOF 0x4000
+#define SPORT 38709
+#define DPORT 8080
+#define TTL 64
+
+struct pseudo_hdr {
+  u_int32_t src;  //源IP地址，32bit；看源程序中ip_src_addr和ip_dst_addr类型而定
+  // struct in_addr dst;
+  u_int32_t dst;  //目的IP地址，32bit
+  // uint8_t mbz;
+  char mbz;  //全0，8bit
+  // uint8_t protocol;
+  char protocol;  //协议字段，8bit
+  // uint16_t len;
+  short int len;  // UDP长度，16bit；UDP首部+净荷总长
+};
+
 // IP地址转为16进制表示
 void convertIpToByteArray(const char *ipAddress, unsigned char *byteArray) {
   struct in_addr addr;
@@ -116,9 +134,6 @@ int main(int argc, char *argv[]) {
   // sleep(5);
   for (int i = 0; i < 3; i++) {
     u_int32_t sip, dip;
-    // unsigned char sip[4];
-    // unsigned char dip[4];
-    unsigned char port[2];
     unsigned short udpLen;
     unsigned short udpCheckSum;
     unsigned short ipCheckSum;
@@ -130,6 +145,7 @@ int main(int argc, char *argv[]) {
     struct iphdr *ipd = (struct iphdr *)(buf);
     struct udphdr *udpd = (struct udphdr *)(buf + sizeof(struct iphdr));
     unsigned short totLen;
+    struct pseudo_hdr *psed = (struct pseudo_hdr *)(udpPacket);
     memset(message, 0, sizeof(message));
 
     sprintf(name, "%s%d", "test", i);
@@ -142,9 +158,9 @@ int main(int argc, char *argv[]) {
     ipd->ihl = 5;
     ipd->version = 4;
     ipd->tos = 0;
-    ipd->id = htons(0xaabb);
-    ipd->frag_off = htons(0x4000);
-    ipd->ttl = 64;
+    ipd->id = htons(IPID);
+    ipd->frag_off = htons(FGOF);
+    ipd->ttl = TTL;
     ipd->protocol = 17;
     sip = inet_addr("10.10.10.1");
     dip = inet_addr("192.168.0.39");
@@ -152,18 +168,19 @@ int main(int argc, char *argv[]) {
     ipd->daddr = dip;
 
     // UDP头部
-    udpd->source = htons(38709);
-    udpd->dest = htons(8080);
+    udpd->source = htons(SPORT);
+    udpd->dest = htons(DPORT);
     udpLen = 8 + payloadLen;
     udpd->len = htons(udpLen);
+    udpd->check = 0x0000;
     memcpy(&buf[28], message, payloadLen);
 
     //计算校验和
-    *((unsigned short *)&buf[26]) = 0x0000;
-    memcpy(udpPacket, buf + 12, 4);
-    memcpy(udpPacket + 4, buf + 16, 4);
-    *(unsigned short *)&udpPacket[8] = 0x1100;
-    memcpy(udpPacket + 10, buf + 24, 2);
+    psed->src = sip;
+    psed->dst = dip;
+    psed->mbz = 0;
+    psed->protocol = 17;
+    psed->len = udpd->len;
     memcpy(udpPacket + 12, buf + 20, udpLen);
 
     udpCheckSum = calculateChecksum(udpPacket, udpLen + 12);
