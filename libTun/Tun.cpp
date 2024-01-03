@@ -108,3 +108,27 @@ int udpTunSend(int tun, int dport, unsigned char *buf, unsigned char *message,
   ret = write(tun, buf, IPHDLEN + udpLen);
   return ret;
 }
+
+socklen_t sockPre(int &sockfd, struct sockaddr_in &servaddr,
+                  struct sockaddr_in &cliaddr, int port) {
+  // socket文件描述符
+  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    perror("socket creation failed");
+    exit(EXIT_FAILURE);
+  }
+
+  memset(&servaddr, 0, sizeof(servaddr));
+  memset(&cliaddr, 0, sizeof(cliaddr));
+
+  // 填充服务端信息
+  servaddr.sin_family = AF_INET;  // IPv4
+  servaddr.sin_addr.s_addr = INADDR_ANY;
+  servaddr.sin_port = htons(port);
+
+  // 绑定
+  if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+    perror("bind failed");
+    exit(EXIT_FAILURE);
+  }
+  return (socklen_t)sizeof(cliaddr);
+}

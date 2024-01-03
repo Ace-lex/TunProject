@@ -7,6 +7,6 @@ clean:
 RoceSend:clean
 		g++ RoceSend.cpp -o RoceSend -L. -lTun
 UDPServer:clean
-		g++ UDPServer.cpp -o UDPServer
+		g++ UDPServer.cpp -o UDPServer -L. -lTun
 
 .PHONY: all clean

@@ -45,4 +45,6 @@ int udpTunSend(int tun, int dport, unsigned char *buf, unsigned char *message,
                int payloadLen);
 int fileSize(char *filename);
 int tunCreate(char *dev, int flags);
+socklen_t sockPre(int &sockfd, struct sockaddr_in &servaddr,
+                  struct sockaddr_in &cliaddr, int port);
 #endif

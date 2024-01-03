@@ -24,7 +24,6 @@ int fileSize(char *filename) {
 int main(int argc, char *argv[]) {
   int sockfd;
   char buffer[MAXLINE];
-  char *hello = "Hello from client";
   struct sockaddr_in servaddr;
   int payloadLen;
 

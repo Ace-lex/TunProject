@@ -1,11 +1,11 @@
-APPS = TunRecv UDPSend
+APPS = TunRecvSend UDPSend
 all : $(APPS)
 
 clean:
 	$(foreach fname,${APPS}, rm -f ${fname})
 
-TunRecv:clean
-		g++ TunRecv.cpp -o TunRecv
+TunRecvSend:clean
+		g++ TunRecvSend.cpp -o TunRecvSend -L. -lTun
 UDPSend:clean
 		g++ UDPSend.cpp -o UDPSend
 

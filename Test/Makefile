@@ -7,6 +7,6 @@ clean:
 TunTest:clean
 		g++ TunTest.cpp -o TunTest -L. -lTun
 UDPServer:clean
-		g++ UDPServer.cpp -o UDPServer
+		g++ UDPServer.cpp -o UDPServer -L. -lTun
 
 .PHONY: all clean
