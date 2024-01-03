@@ -5,7 +5,7 @@ clean:
 	$(foreach fname,${APPS}, rm -f ${fname})
 
 RoceSend:clean
-		g++ RoceSend.cpp -o RoceSend
+		g++ RoceSend.cpp -o RoceSend -L. -lTun
 UDPServer:clean
 		g++ UDPServer.cpp -o UDPServer
 

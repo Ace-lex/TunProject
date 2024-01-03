@@ -1,4 +1,5 @@
 #include "Tun.h"
+#define DPORT 8080
 
 int main(int argc, char *argv[]) {
   int tun, ret;
@@ -16,7 +17,7 @@ int main(int argc, char *argv[]) {
   system("./script.sh");
   // sleep(5);
   for (int i = 0; i < 3; i++) {
-    unsigned char message[4096];
+    unsigned char message[PKT_LEN];
     int payloadLen;
     char name[100];
     memset(message, 0, sizeof(message));
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]) {
     fread(message, 1, payloadLen, fp);
     fclose(fp);
 
-    ret = udpTunSend(tun, buf, message, payloadLen);
+    ret = udpTunSend(tun, DPORT, buf, message, payloadLen);
 
     printf("write %d bytes\n", ret);
     fflush(stdout);

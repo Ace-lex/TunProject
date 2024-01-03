@@ -23,8 +23,11 @@
 #define IPID 0xaabb
 #define FGOF 0x4000
 #define SPORT 38709
-#define DPORT 8080
 #define TTL 64
+#define PKT_LEN 4096
+#define SRCIP "10.10.10.1"
+#define DSTIP "192.168.0.39"
+#define IPHDLEN 20
 
 struct pseudo_hdr {
   u_int32_t src;  //源IP地址，32bit；看源程序中ip_src_addr和ip_dst_addr类型而定
@@ -38,7 +41,7 @@ struct pseudo_hdr {
   short int len;  // UDP长度，16bit；UDP首部+净荷总长
 };
 
-int udpTunSend(int tun, unsigned char *buf, unsigned char *message,
+int udpTunSend(int tun, int dport, unsigned char *buf, unsigned char *message,
                int payloadLen);
 int fileSize(char *filename);
 int tunCreate(char *dev, int flags);

@@ -54,13 +54,13 @@ uint16_t calculateChecksum(uint8_t *packet, size_t length) {
   return checksum;
 }
 
-int udpTunSend(int tun, unsigned char *buf, unsigned char *message,
+int udpTunSend(int tun, int dport, unsigned char *buf, unsigned char *message,
                int payloadLen) {
   u_int32_t sip, dip;
   unsigned short udpLen;
   unsigned short udpCheckSum;
   unsigned short ipCheckSum;
-  unsigned char udpPacket[4096];
+  unsigned char udpPacket[PKT_LEN];
   char name[100];
   uint8_t protocal;
   struct iphdr *ipd = (struct iphdr *)(buf);
@@ -68,14 +68,6 @@ int udpTunSend(int tun, unsigned char *buf, unsigned char *message,
   unsigned short totLen;
   struct pseudo_hdr *psed = (struct pseudo_hdr *)(udpPacket);
   int ret;
-  // memset(message, 0, sizeof(message));
-
-  // sprintf(name, "%s%d", "test", i);
-  // payloadLen = fileSize(name);
-  // FILE *fp;
-  // fp = fopen(name, "rb");
-  // fread(message, 1, payloadLen, fp);
-  // fclose(fp);
 
   ipd->ihl = 5;
   ipd->version = 4;
@@ -84,14 +76,14 @@ int udpTunSend(int tun, unsigned char *buf, unsigned char *message,
   ipd->frag_off = htons(FGOF);
   ipd->ttl = TTL;
   ipd->protocol = 17;
-  sip = inet_addr("10.10.10.1");
-  dip = inet_addr("192.168.0.39");
+  sip = inet_addr(SRCIP);
+  dip = inet_addr(DSTIP);
   ipd->saddr = sip;
   ipd->daddr = dip;
 
   // UDP头部
   udpd->source = htons(SPORT);
-  udpd->dest = htons(DPORT);
+  udpd->dest = htons(dport);
   udpLen = 8 + payloadLen;
   udpd->len = htons(udpLen);
   udpd->check = 0x0000;
@@ -103,17 +95,16 @@ int udpTunSend(int tun, unsigned char *buf, unsigned char *message,
   psed->mbz = 0;
   psed->protocol = 17;
   psed->len = udpd->len;
-  memcpy(udpPacket + 12, buf + 20, udpLen);
+  memcpy(udpPacket + 12, buf + IPHDLEN, udpLen);
 
   udpCheckSum = calculateChecksum(udpPacket, udpLen + 12);
   udpd->check = htons(udpCheckSum);
 
-  totLen = 20 + udpLen;
+  totLen = IPHDLEN + udpLen;
   ipd->tot_len = htons(totLen);
   ipd->check = 0x0000;
-  *(unsigned short *)&buf[10] = 0x0000;
-  ipCheckSum = calculateChecksum(buf, 20);
+  ipCheckSum = calculateChecksum(buf, IPHDLEN);
   ipd->check = htons(ipCheckSum);
-  ret = write(tun, buf, 20 + udpLen);
+  ret = write(tun, buf, IPHDLEN + udpLen);
   return ret;
 }
