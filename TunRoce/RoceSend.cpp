@@ -1,5 +1,8 @@
 
-#include "Tun.h"
+#include "../libTun/Tun.h"
+#define SIP "10.10.10.1"
+#define DIP "192.168.0.39"
+#define SPORT 31233
 #define DPORT 4791
 #define BTH_DEF_PKEY (0xffff)
 #define DQPN 0x012c3f
@@ -70,7 +73,7 @@ int main(int argc, char *argv[]) {
     // DETH
     deth->qkey = htonl(QKEY);
     deth->sqp = htonl(SQP & BTH_QPN_MASK);
-    ret = udpTunSend(tun, DPORT, buf, message,
+    ret = udpTunSend(tun, SIP, DIP, SPORT, DPORT, buf, message,
                      payloadLen + sizeof(rxe_bth) + sizeof(rxe_deth));
 
     printf("write %d bytes\n", ret);

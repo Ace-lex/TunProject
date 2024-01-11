@@ -1,5 +1,8 @@
-#include "Tun.h"
+#include "../libTun/Tun.h"
+#define SPORT 31233
 #define DPORT 8080
+#define SIP "10.10.10.1"
+#define DIP "192.168.0.39"
 
 int main(int argc, char *argv[]) {
   int tun, ret;
@@ -29,7 +32,7 @@ int main(int argc, char *argv[]) {
     fread(message, 1, payloadLen, fp);
     fclose(fp);
 
-    ret = udpTunSend(tun, DPORT, buf, message, payloadLen);
+    ret = udpTunSend(tun, SIP, DIP, SPORT, DPORT, buf, message, payloadLen);
 
     printf("write %d bytes\n", ret);
     fflush(stdout);

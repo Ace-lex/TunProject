@@ -54,14 +54,15 @@ uint16_t calculateChecksum(uint8_t *packet, size_t length) {
   return checksum;
 }
 
-int udpTunSend(int tun, int dport, unsigned char *buf, unsigned char *message,
+int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
+               int dport, unsigned char *buf, unsigned char *message,
                int payloadLen) {
   u_int32_t sip, dip;
   unsigned short udpLen;
   unsigned short udpCheckSum;
   unsigned short ipCheckSum;
   unsigned char udpPacket[PKT_LEN];
-  char name[100];
+  char name[FILE_NAME_LEN];
   uint8_t protocal;
   struct iphdr *ipd = (struct iphdr *)(buf);
   struct udphdr *udpd = (struct udphdr *)(buf + sizeof(struct iphdr));
@@ -76,13 +77,13 @@ int udpTunSend(int tun, int dport, unsigned char *buf, unsigned char *message,
   ipd->frag_off = htons(FGOF);
   ipd->ttl = TTL;
   ipd->protocol = 17;
-  sip = inet_addr(SRCIP);
-  dip = inet_addr(DSTIP);
+  sip = inet_addr(hostSip);
+  dip = inet_addr(hostDip);
   ipd->saddr = sip;
   ipd->daddr = dip;
 
   // UDP头部
-  udpd->source = htons(SPORT);
+  udpd->source = htons(sport);
   udpd->dest = htons(dport);
   udpLen = 8 + payloadLen;
   udpd->len = htons(udpLen);

@@ -20,13 +20,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#define FILE_NAME_LEN 100
 #define IPID 0xaabb
 #define FGOF 0x4000
-#define SPORT 38709
 #define TTL 64
 #define PKT_LEN 4096
-#define SRCIP "10.10.10.1"
-#define DSTIP "192.168.0.39"
 #define IPHDLEN 20
 
 struct pseudo_hdr {
@@ -41,7 +39,8 @@ struct pseudo_hdr {
   short int len;  // UDP长度，16bit；UDP首部+净荷总长
 };
 
-int udpTunSend(int tun, int dport, unsigned char *buf, unsigned char *message,
+int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
+               int dport, unsigned char *buf, unsigned char *message,
                int payloadLen);
 int fileSize(char *filename);
 int tunCreate(char *dev, int flags);

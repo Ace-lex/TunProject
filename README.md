@@ -1,21 +1,17 @@
-## libTun
+## TunRecv&UDPSend
 
-tun发送udp报文的动态库，编译后放到其他目录下
-
-## TunRecvSend&UDPSend
-
-TunRecvSend可以接收/发送UDP数据包
+用于接收发送UDP包
 
 ```shell
 make
-./TunRecvSend [file]
+./TunRecv [file]
 ./script.sh
 ./UDPSend [file]
 ```
 
 ## Test
 
-测试发送的UDP包正确（仅测试发送）
+测试发送的UDP包正确
 
 ```shell
 cd Test
