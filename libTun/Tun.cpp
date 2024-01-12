@@ -70,13 +70,13 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   struct pseudo_hdr *psed = (struct pseudo_hdr *)(udpPacket);
   int ret;
 
-  ipd->ihl = 5;
-  ipd->version = 4;
-  ipd->tos = 0;
+  ipd->ihl = IHL;
+  ipd->version = IPV;
+  ipd->tos = TOS;
   ipd->id = htons(IPID);
   ipd->frag_off = htons(FGOF);
   ipd->ttl = TTL;
-  ipd->protocol = 17;
+  ipd->protocol = UDP_PROTO;
   sip = inet_addr(hostSip);
   dip = inet_addr(hostDip);
   ipd->saddr = sip;
@@ -88,7 +88,7 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   udpLen = 8 + payloadLen;
   udpd->len = htons(udpLen);
   udpd->check = 0x0000;
-  memcpy(&buf[28], message, payloadLen);
+  memcpy(&buf[IPH_LEN + UDPH_LEN], message, payloadLen);
 
   //计算校验和
   psed->src = sip;
@@ -96,17 +96,17 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   psed->mbz = 0;
   psed->protocol = 17;
   psed->len = udpd->len;
-  memcpy(udpPacket + 12, buf + IPHDLEN, udpLen);
+  memcpy(udpPacket + PSE_UDPH_LEN, buf + IPH_LEN, udpLen);
 
   udpCheckSum = calculateChecksum(udpPacket, udpLen + 12);
   udpd->check = htons(udpCheckSum);
 
-  totLen = IPHDLEN + udpLen;
+  totLen = IPH_LEN + udpLen;
   ipd->tot_len = htons(totLen);
   ipd->check = 0x0000;
-  ipCheckSum = calculateChecksum(buf, IPHDLEN);
+  ipCheckSum = calculateChecksum(buf, IPH_LEN);
   ipd->check = htons(ipCheckSum);
-  ret = write(tun, buf, IPHDLEN + udpLen);
+  ret = write(tun, buf, IPH_LEN + udpLen);
   return ret;
 }
 
