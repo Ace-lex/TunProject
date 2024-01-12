@@ -13,9 +13,6 @@ jobs:
     steps:
     - name: Check out code
       uses: actions/checkout@v2
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps: 
-      - run: cd Test && ./test.sh
+    - name: Test
+      run: cd Test && sudo ./test.sh
     
