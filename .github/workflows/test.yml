@@ -14,5 +14,5 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
     - name: Test
-      run: cd Test && sudo ./test.sh
+      run: cd Test && sudo chmod +x ./test.sh && sudo ./test.sh
     
