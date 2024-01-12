@@ -14,11 +14,8 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
     - name: Compile
-<<<<<<< HEAD
       run: sudo chmod +x ./compile.sh && ./compile.sh
-=======
       uses: sudo chmod +x ./compile.sh && ./compile.sh
->>>>>>> 5733402a8509f091494006d19e0d834f64099fd5
     - name: Test
       run: cd Test && sudo chmod +x ./test.sh && sudo ./test.sh
     
