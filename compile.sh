@@ -1,6 +1,4 @@
 #!/bin/bash
-make
-cd libTun && make
+cd libTun && make && cp libTun.so ../Test/libTun.so
 cd ../Test && make
-cd ../TunRoce && make
 cd ..
