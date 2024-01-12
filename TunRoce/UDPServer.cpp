@@ -1,5 +1,5 @@
 
-#include "Tun.h"
+#include "../libTun/Tun.h"
 #define PORT 4791
 
 int main() {
@@ -8,7 +8,7 @@ int main() {
   char sendbuffer[PKT_LEN];
   unsigned char example[PKT_LEN];
   struct sockaddr_in servaddr, cliaddr;
-  char name[100];
+  char name[FILE_NAME_LEN];
 
   int n;
   socklen_t len = sockPre(sockfd, servaddr, cliaddr, PORT);

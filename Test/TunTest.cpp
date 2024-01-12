@@ -1,3 +1,5 @@
+//用于进行传输测试，需通过命令行传入目的地址（本机IP）
+
 #include "../libTun/Tun.h"
 #define TEST_FILE 3
 #define SPORT 31233
@@ -18,7 +20,7 @@ int main(int argc, char *argv[]) {
   }
   printf("TUN name is %s\n", tunName);
   fflush(stdout);
-  system("./script.sh");
+  system("../script.sh");
   // sleep(5);
   for (int i = 0; i < TEST_FILE; i++) {
     unsigned char message[PKT_LEN];
@@ -33,10 +35,9 @@ int main(int argc, char *argv[]) {
     fread(message, 1, payloadLen, fp);
     fclose(fp);
 
-    ret = udpTunSend(tun, SIP, DIP, SPORT, DPORT, buf, message, payloadLen);
+    ret = udpTunSend(tun, SIP, (const char *)argv[1], SPORT, DPORT, buf,
+                     message, payloadLen);
 
-    printf("write %d bytes\n", ret);
-    fflush(stdout);
     sleep(1);
   }
 

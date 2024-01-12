@@ -31,7 +31,7 @@ int main() {
       assert(example[j] == buffer[j]);
     }
 
-    printf("received %d bytes, success\n", n);
+    printf("Received %d bytes, test%d passed\n", n, i);
   }
 
   return 0;

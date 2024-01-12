@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
   }
   printf("TUN name is %s\n", tunName);
   fflush(stdout);
-  system("./script.sh");
+  system("../script.sh");
 
   for (;;) {
     memset(buf, 0, sizeof(buf));

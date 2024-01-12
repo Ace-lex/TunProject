@@ -9,13 +9,13 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: execute test
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.SSH_PASSWORD }}
-        script: cd ${{ secrets.TESTDIR }} && ./test.sh
+    - name: Check out code
+      uses: actions/checkout@v2
+  test:
+    needs: build
+    runs on: ubuntu-latest
+    steps: 
+      - run: cd Test && ./test.sh
     
