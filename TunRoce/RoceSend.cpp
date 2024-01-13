@@ -1,3 +1,4 @@
+// Send basic RoCEv2 packet using libTun.so
 
 #include "../libTun/Tun.h"
 #define SIP "10.10.10.1"
@@ -7,11 +8,18 @@
 #define BTH_DEF_PKEY (0xffff)
 #define DQPN 0x012c3f
 #define PSN 0x123456
+#define BTH_FLAG_MASK 0x40
 #define BTH_PSN_MASK (0x00ffffff)
 #define BTH_QPN_MASK (0x00ffffff)
 #define QKEY 0x1ee7a330
 #define SQP 0x012c41
+#define IBH_LEN 20
+#define OPCODE 100  // UD SEND
+#define TEST_FILE_PREFIX "test"
+#define INTERVAL 1  // send interval
+#define SCRIPT_ADDR "../script.sh"
 
+// the struct of BTH
 struct rxe_bth {
   u_int8_t opcode;
   u_int8_t flags;
@@ -20,6 +28,7 @@ struct rxe_bth {
   u_int32_t apsn;
 };
 
+// the struct of DETH
 struct rxe_deth {
   __be32 qkey;
   __be32 sqp;
@@ -28,8 +37,9 @@ struct rxe_deth {
 int main(int argc, char *argv[]) {
   int tun, ret;
   char tunName[IFNAMSIZ];
-  unsigned char buf[4096];
+  unsigned char buf[PKT_LEN];
 
+  // Create tun device
   tunName[0] = '\0';
   tun = tunCreate(tunName, IFF_TUN | IFF_NO_PI);
   if (tun < 0) {
@@ -38,34 +48,35 @@ int main(int argc, char *argv[]) {
   }
   printf("TUN name is %s\n", tunName);
   fflush(stdout);
-  system("../script.sh");
+  system(SCRIPT_ADDR);
 
+  // Send RoCEv2 packets
   for (;;) {
     memset(buf, 0, sizeof(buf));
-    unsigned char udpPacket[4096];
-    char name[100];
+    unsigned char udpPacket[PKT_LEN];
+    char name[FILE_NAME_LEN];
     uint8_t protocal;
     unsigned char message[PKT_LEN];
     struct rxe_bth *bth = (struct rxe_bth *)message;
-    struct rxe_deth *deth = (struct rxe_deth *)&message[12];
+    struct rxe_deth *deth = (struct rxe_deth *)&message[PSE_UDPH_LEN];
     int payloadLen;
-    unsigned char setPdCnt;
+    unsigned char setPadCnt;
     memset(message, 0, sizeof(message));
 
-    sprintf(name, "%s", "test");
+    sprintf(name, "%s", TEST_FILE_PREFIX);
     payloadLen = fileSize(name);
     FILE *fp;
     fp = fopen(name, "rb");
-    fread(message + 20, 1, payloadLen, fp);
+    fread(message + IBH_LEN, 1, payloadLen, fp);
     fclose(fp);
     if (payloadLen % 4 != 0) {
-      setPdCnt = (payloadLen % 4) << 4;
+      setPadCnt = (payloadLen % 4) << 4;
       payloadLen = payloadLen + 4 - payloadLen % 4;
     }
 
     // Infiniband BTH
-    bth->opcode = 100;
-    bth->flags = 0x40 | setPdCnt;
+    bth->opcode = OPCODE;
+    bth->flags = BTH_FLAG_MASK | setPadCnt;
     bth->pkey = htons(BTH_DEF_PKEY);
     bth->qpn = htonl(DQPN & BTH_QPN_MASK);
     bth->apsn = htonl(PSN & BTH_PSN_MASK);
@@ -73,6 +84,8 @@ int main(int argc, char *argv[]) {
     // DETH
     deth->qkey = htonl(QKEY);
     deth->sqp = htonl(SQP & BTH_QPN_MASK);
+
+    // Send packet
     ret = udpTunSend(tun, SIP, DIP, SPORT, DPORT, buf, message,
                      payloadLen + sizeof(rxe_bth) + sizeof(rxe_deth));
 

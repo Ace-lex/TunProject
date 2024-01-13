@@ -12,6 +12,7 @@
 
 #define PORT 8080
 #define MAXLINE 1024
+#define DST_IP "10.10.10.1"
 
 int fileSize(char *filename) {
   struct stat statbuf;
@@ -38,7 +39,7 @@ int main(int argc, char *argv[]) {
   // 填充服务端信息
   servaddr.sin_family = AF_INET;
   servaddr.sin_port = htons(PORT);
-  servaddr.sin_addr.s_addr = inet_addr("10.10.10.1");
+  servaddr.sin_addr.s_addr = inet_addr(DST_IP);
 
   socklen_t len = (socklen_t)sizeof(servaddr);  // len is value/resuslt
 

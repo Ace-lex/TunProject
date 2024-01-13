@@ -76,7 +76,7 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   ipd->id = htons(IPID);
   ipd->frag_off = htons(FGOF);
   ipd->ttl = TTL;
-  ipd->protocol = UDP_PROTO;
+  ipd->protocol = IPPROTO_UDP;
   sip = inet_addr(hostSip);
   dip = inet_addr(hostDip);
   ipd->saddr = sip;
@@ -94,11 +94,11 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   psed->src = sip;
   psed->dst = dip;
   psed->mbz = 0;
-  psed->protocol = 17;
+  psed->protocol = IPPROTO_UDP;
   psed->len = udpd->len;
   memcpy(udpPacket + PSE_UDPH_LEN, buf + IPH_LEN, udpLen);
 
-  udpCheckSum = calculateChecksum(udpPacket, udpLen + 12);
+  udpCheckSum = calculateChecksum(udpPacket, udpLen + PSE_UDPH_LEN);
   udpd->check = htons(udpCheckSum);
 
   totLen = IPH_LEN + udpLen;

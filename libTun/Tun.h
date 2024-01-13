@@ -31,7 +31,6 @@
 #define IPV 4
 #define IHL 5
 #define TOS 0
-#define UDP_PROTO 17
 
 struct pseudo_hdr {
   u_int32_t src;  //源IP地址，32bit；看源程序中ip_src_addr和ip_dst_addr类型而定
