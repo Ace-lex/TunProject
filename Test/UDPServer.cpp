@@ -1,5 +1,5 @@
 
-#include "../libTun/Tun.h"
+#include "Tun.h"
 #define TEST_FILE 3
 #define PORT 8080
 

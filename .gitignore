@@ -52,8 +52,4 @@ Mkfile.old
 dkms.conf
 
 # Binary file in this project
-TunRecvSend
-UDPSend
-TunTest
-UDPServer
-RoceSend
+build/

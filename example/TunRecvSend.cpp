@@ -1,6 +1,6 @@
 // example of sending and recving udp packets by tun device
 
-#include "../libTun/Tun.h"
+#include "Tun.h"
 #define DEFAULT_MESSAGE "reply by tun"
 #define IP_ADDR_LEN 15
 

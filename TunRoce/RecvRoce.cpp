@@ -1,5 +1,5 @@
 
-#include "../libTun/Tun.h"
+#include "Tun.h"
 #define PORT 4791
 
 int main() {

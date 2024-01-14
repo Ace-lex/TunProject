@@ -1,6 +1,6 @@
 // Send basic RoCEv2 packet using libTun.so
 
-#include "../libTun/Tun.h"
+#include "Tun.h"
 #define SIP "10.10.10.1"
 #define DIP "192.168.0.39"
 #define SPORT 31233

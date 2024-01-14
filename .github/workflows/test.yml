@@ -14,7 +14,7 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
     - name: Compile
-      run: sudo chmod +x ./compile.sh && ./compile.sh
+      run: cmake -B build && cmake --build build
     - name: Test
-      run: cd Test && sudo chmod +x ./test.sh && sudo ./test.sh
+      run: cd build/Test && sudo chmod +x ./test.sh && sudo ./test.sh
     

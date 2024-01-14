@@ -1,11 +1,10 @@
 //用于进行传输测试，需通过命令行传入目的地址（本机IP）
 
-#include "../libTun/Tun.h"
+#include "Tun.h"
 #define TEST_FILE 3
 #define SPORT 31233
 #define DPORT 8080
 #define SIP "10.10.10.1"
-#define DIP "192.168.0.39"
 #define SCRIPT_ADDR "../script.sh"
 #define TEST_FILE_PREFIX "test"
 
