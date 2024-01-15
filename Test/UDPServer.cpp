@@ -1,7 +1,9 @@
-
+// UDPServer.cpp: receive udp packet sended by tun device and check for
+// correctness
 #include "Tun.h"
 #define TEST_FILE 3
 #define PORT 8080
+#define TEST_FILE_PREFIX "test"
 
 int main() {
   int sockfd;
@@ -12,21 +14,30 @@ int main() {
   char name[FILE_NAME_LEN];
   int n;
 
+  // Preparation for receiving
   socklen_t len = sockPre(sockfd, servaddr, cliaddr, PORT);
 
   for (int i = 0; i < TEST_FILE; i++) {
+    // Receive the packets
     memset(example, 0, sizeof(example));
     n = recvfrom(sockfd, buffer, PKT_LEN, MSG_WAITALL,
                  (struct sockaddr *)&cliaddr,
-                 &len);  //接收到说明IP包格式和UDP格式正确
-    sprintf(name, "%s%d", "test", i);
+                 &len);  // Receiving packets successfully indicates that the IP
+                         // and UDP packet formats are correct.
+
+    // Read the check file
+    sprintf(name, "%s%d", TEST_FILE_PREFIX, i);
     FILE *fp;
     int fileLen;
     fp = fopen(name, "rb");
     fileLen = fileSize(name);
     fread(example, 1, fileLen, fp);
     fclose(fp);
+
+    // Check length correction
     assert(n == fileLen);
+
+    // Check payload correction
     for (int j = 0; j < fileLen; j++) {
       assert(example[j] == buffer[j]);
     }

@@ -1,4 +1,4 @@
-// example of sending and recving udp packets by tun device
+// TunDevice.cpp: example of sending and recving udp packets by tun device
 
 #include "Tun.h"
 #define DEFAULT_MESSAGE "reply by tun"
@@ -31,6 +31,8 @@ int main(int argc, char *argv[]) {
     uint8_t protocal;
     unsigned char message[PKT_LEN];
     int payloadLen;
+
+    // Read payload file or get payload from stdin
     memset(message, 0, sizeof(message));
     if (argc < 2) {
       sprintf((char *)message, DEFAULT_MESSAGE);

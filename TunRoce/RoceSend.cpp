@@ -1,4 +1,4 @@
-// Send basic RoCEv2 packet using libTun.so
+// RoceSend.cpp: Send basic RoCEv2 packet using libTun.so
 
 #include "Tun.h"
 #define SIP "10.10.10.1"
@@ -91,7 +91,8 @@ int main(int argc, char *argv[]) {
 
     printf("write %d bytes\n", ret);
     fflush(stdout);
-    sleep(1);
+    //  Ensure successful reception at the receiving end.
+    sleep(INTERVAL);
   }
 
   return 0;

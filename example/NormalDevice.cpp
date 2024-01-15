@@ -1,4 +1,4 @@
-
+// NormalDevice.cpp: communicate with the TUN device.
 #include <arpa/inet.h>
 #include <assert.h>
 #include <netinet/in.h>
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in servaddr;
   int payloadLen;
 
-  // 创建socket文件描述符
+  // Create the socket file description
   if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("socket creation failed");
     exit(EXIT_FAILURE);
@@ -36,15 +36,16 @@ int main(int argc, char *argv[]) {
   // printf("socket successfully built\n");
   memset(&servaddr, 0, sizeof(servaddr));
 
-  // 填充服务端信息
+  // Populate the server information
   servaddr.sin_family = AF_INET;
   servaddr.sin_port = htons(PORT);
   servaddr.sin_addr.s_addr = inet_addr(DST_IP);
 
   socklen_t len = (socklen_t)sizeof(servaddr);  // len is value/resuslt
 
-  // 发送消息
+  // Send message
   while (1) {
+    // Read payload file or get payload from stdin
     if (argc == 1) {
       fgets(buffer, MAXLINE, stdin);
       payloadLen = strlen(buffer);
@@ -54,16 +55,18 @@ int main(int argc, char *argv[]) {
       fread(buffer, 1, payloadLen, fp);
       fclose(fp);
     }
+
+    // Send packets to tun device
     sendto(sockfd, (const char *)buffer, payloadLen, 0,
            (const struct sockaddr *)&servaddr, len);
     fprintf(stdout, "message: %s have sent.\n", buffer);
     fflush(stdout);
-    int n =
-        recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL,
-                 (struct sockaddr *)&servaddr, &len);  //收到信息便说明格式正确
+
+    // Receive packets from tun device
+    int n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL,
+                     (struct sockaddr *)&servaddr, &len);
     buffer[n] = '\0';
     printf("Server : %s\n", buffer);
-    // assert(!strcmp(buffer,"reply by tu"));
   }
 
   close(sockfd);

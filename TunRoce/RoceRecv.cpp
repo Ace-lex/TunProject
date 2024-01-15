@@ -1,4 +1,4 @@
-
+// RoceRecv.cpp: receive RoCEv2 packet sended by tun device
 #include "Tun.h"
 #define PORT 4791
 
@@ -10,10 +10,12 @@ int main() {
   struct sockaddr_in servaddr, cliaddr;
   char name[FILE_NAME_LEN];
 
+  // Preparation for receiving packets
   int n;
   socklen_t len = sockPre(sockfd, servaddr, cliaddr, PORT);
 
   for (;;) {
+    // Receive RoCEv2 packets
     memset(example, 0, sizeof(example));
     n = recvfrom(sockfd, buffer, PKT_LEN, MSG_WAITALL,
                  (struct sockaddr *)&cliaddr,

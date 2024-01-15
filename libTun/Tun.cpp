@@ -1,5 +1,7 @@
+// Tun.cpp: functions used in sending udp packets by tun
 #include "Tun.h"
 
+// Create a tun device, returning the file description of the device
 int tunCreate(char *dev, int flags) {
   struct ifreq ifr;
   int fd, err;
@@ -20,6 +22,7 @@ int tunCreate(char *dev, int flags) {
   return fd;
 }
 
+// Return the file size
 int fileSize(char *filename) {
   struct stat statbuf;
   stat(filename, &statbuf);
@@ -28,8 +31,9 @@ int fileSize(char *filename) {
   return size;
 }
 
+// Calculate the ip/udp checksum
 uint16_t calculateChecksum(uint8_t *packet, size_t length) {
-  // 如果UDP数据包长度为奇数，则添加一个零字节
+  //  If the length of the UDP datagram is odd, add a zero byte.
   if (length % 2 != 0) {
     packet[length] = '\0';
     length++;
@@ -37,23 +41,32 @@ uint16_t calculateChecksum(uint8_t *packet, size_t length) {
 
   uint32_t sum = 0;
 
-  // 将16位字节对相加
+  // Add the 16-bit byte pairs.
   for (size_t i = 0; i < length; i += 2) {
     uint16_t word = (packet[i] << 8) + packet[i + 1];
     sum += word;
   }
 
-  // 将进位加到低16位
+  // Add the carry to the low 16 bits.
   while (sum >> 16) {
     sum = (sum & 0xFFFF) + (sum >> 16);
   }
 
-  // 取反
+  // Negate
   uint16_t checksum = (uint16_t)(~sum);
 
   return checksum;
 }
 
+// Send udp packets by tun
+// Take in source and destination IP address and port, returning the number of
+// successfully transmitted bytes.
+
+// About buf and message: 'message' is used to convey the payload
+// There are other ways to design the API, such as retaining only 'buf' param, 
+// which can save memory space but may be inconvenient to users.
+// The function can also internally create a buffer 'buf' 
+// and only pass the 'message' parameter.
 int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
                int dport, unsigned char *buf, unsigned char *message,
                int payloadLen) {
@@ -82,7 +95,7 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   ipd->saddr = sip;
   ipd->daddr = dip;
 
-  // UDP头部
+  // UDP header
   udpd->source = htons(sport);
   udpd->dest = htons(dport);
   udpLen = 8 + payloadLen;
@@ -90,7 +103,7 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   udpd->check = 0x0000;
   memcpy(&buf[IPH_LEN + UDPH_LEN], message, payloadLen);
 
-  //计算校验和
+  // preparation for calculate the checksum
   psed->src = sip;
   psed->dst = dip;
   psed->mbz = 0;
@@ -98,21 +111,26 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   psed->len = udpd->len;
   memcpy(udpPacket + PSE_UDPH_LEN, buf + IPH_LEN, udpLen);
 
+  // Calculate the udp checksum
   udpCheckSum = calculateChecksum(udpPacket, udpLen + PSE_UDPH_LEN);
   udpd->check = htons(udpCheckSum);
 
+  // Calculate the ip checksum
   totLen = IPH_LEN + udpLen;
   ipd->tot_len = htons(totLen);
   ipd->check = 0x0000;
   ipCheckSum = calculateChecksum(buf, IPH_LEN);
   ipd->check = htons(ipCheckSum);
+
+  // Send udp packets
   ret = write(tun, buf, IPH_LEN + udpLen);
   return ret;
 }
 
+// Create socket for receive packets sended by tun devices
 socklen_t sockPre(int &sockfd, struct sockaddr_in &servaddr,
                   struct sockaddr_in &cliaddr, int port) {
-  // socket文件描述符
+  // socket file description
   if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("socket creation failed");
     exit(EXIT_FAILURE);
@@ -121,12 +139,12 @@ socklen_t sockPre(int &sockfd, struct sockaddr_in &servaddr,
   memset(&servaddr, 0, sizeof(servaddr));
   memset(&cliaddr, 0, sizeof(cliaddr));
 
-  // 填充服务端信息
+  // Populate server information.
   servaddr.sin_family = AF_INET;  // IPv4
   servaddr.sin_addr.s_addr = INADDR_ANY;
   servaddr.sin_port = htons(port);
 
-  // 绑定
+  // Bind the server information to the socket
   if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
     perror("bind failed");
     exit(EXIT_FAILURE);

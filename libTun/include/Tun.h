@@ -1,3 +1,4 @@
+// Tun.h: head file of the dynamic library
 #ifndef __TUN_H__
 #define __TUN_H__
 
@@ -33,15 +34,15 @@
 #define TOS 0
 
 struct pseudo_hdr {
-  u_int32_t src;  //源IP地址，32bit；看源程序中ip_src_addr和ip_dst_addr类型而定
+  u_int32_t src;  // source ip address
 
-  u_int32_t dst;  //目的IP地址，32bit
+  u_int32_t dst;  // destination ip address
 
-  char mbz;  //全0，8bit
+  char mbz;  // zero
 
-  char protocol;  //协议字段，8bit
+  char protocol;  // protocol field
 
-  short int len;  // UDP长度，16bit；UDP首部+净荷总长
+  short int len;  // length of udp packet
 };
 
 int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,

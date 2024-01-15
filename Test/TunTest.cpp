@@ -1,4 +1,4 @@
-//用于进行传输测试，需通过命令行传入目的地址（本机IP）
+// TunTest.cpp: transmission test for libTun.so.
 
 #include "Tun.h"
 #define TEST_FILE 3
@@ -7,6 +7,7 @@
 #define SIP "10.10.10.1"
 #define SCRIPT_ADDR "../script.sh"
 #define TEST_FILE_PREFIX "test"
+#define INTERVAL 1  // send interval
 
 int main(int argc, char *argv[]) {
   int tun, ret;
@@ -43,7 +44,8 @@ int main(int argc, char *argv[]) {
     ret = udpTunSend(tun, SIP, (const char *)argv[1], SPORT, DPORT, buf,
                      message, payloadLen);
 
-    sleep(1);
+    // Ensure successful reception at the receiving end.
+    sleep(INTERVAL);
   }
 
   return 0;
