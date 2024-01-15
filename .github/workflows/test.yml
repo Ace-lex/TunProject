@@ -16,5 +16,5 @@ jobs:
     - name: Compile
       run: cmake -B build && cmake --build build
     - name: Test
-      run: cd build/Test && sudo chmod +x ../script.sh && sudo chmod +x ./test.sh && sudo ./test.sh
+      run: cd build/test && sudo chmod +x ../script.sh && sudo chmod +x ./test.sh && sudo ./test.sh
     

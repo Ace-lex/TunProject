@@ -1,33 +1,42 @@
-## TunRecv&UDPSend
 
-用于接收发送UDP包
+
+## libTun
+
+使用TUN虚拟设备发送UDP数据包的相关函数
+
+## example
+
+借助libTun.so发送接收UDP数据包的使用示例
 
 ```shell
-make
-./TunRecv [file]
-./script.sh
-./UDPSend [file]
+cd build/example
+./TunDevice [filename]
+./NormalDevice [filename]
 ```
 
-## Test
+## test
 
-测试发送的UDP包正确
+测试发送的UDP包格式正确
 
 ```shell
-cd Test
-make
-./UDPServer
-./TunTest
+cd build/test
+./test.sh
 ```
 
-## Roce
+## tunroce
 
-发送Rocev2格式的数据包
+组装最基础的RoCEv2数据包
 
 ```shell
-cd TunRoce
-make
-./UDPServer
+cd build/tunroce
+./RoceRecv
 ./RoceSend
+```
+
+## compile
+
+```shell
+cmake -B build
+cmake --build build
 ```
 

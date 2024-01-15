@@ -3,7 +3,7 @@ project(Tun)
 
 add_subdirectory(libTun)
 add_subdirectory(example)
-add_subdirectory(Test)
-add_subdirectory(TunRoce)
+add_subdirectory(test)
+add_subdirectory(tunroce)
 
 file(COPY script.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -48,6 +48,8 @@ int main(int argc, char *argv[]) {
   }
   printf("TUN name is %s\n", tunName);
   fflush(stdout);
+
+  // configure the tun device
   system(SCRIPT_ADDR);
 
   // Send RoCEv2 packets
@@ -63,6 +65,7 @@ int main(int argc, char *argv[]) {
     unsigned char setPadCnt;
     memset(message, 0, sizeof(message));
 
+    // Read payload files
     sprintf(name, "%s", TEST_FILE_PREFIX);
     payloadLen = fileSize(name);
     FILE *fp;

@@ -1,4 +1,5 @@
 // Tun.cpp: functions used in sending udp packets by tun
+
 #include "Tun.h"
 
 // Create a tun device, returning the file description of the device
@@ -8,7 +9,7 @@ int tunCreate(char *dev, int flags) {
 
   assert(dev != NULL);
 
-  if ((fd = open("/dev/net/tun", O_RDWR)) < 0) return fd;
+  if ((fd = open(TUN_FILE_NAME, O_RDWR)) < 0) return fd;
 
   memset(&ifr, 0, sizeof(ifr));
   ifr.ifr_flags |= flags;
@@ -63,9 +64,9 @@ uint16_t calculateChecksum(uint8_t *packet, size_t length) {
 // successfully transmitted bytes.
 
 // About buf and message: 'message' is used to convey the payload
-// There are other ways to design the API, such as retaining only 'buf' param, 
+// There are other ways to design the API, such as retaining only 'buf' param,
 // which can save memory space but may be inconvenient to users.
-// The function can also internally create a buffer 'buf' 
+// The function can also internally create a buffer 'buf'
 // and only pass the 'message' parameter.
 int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
                int dport, unsigned char *buf, unsigned char *message,
@@ -83,6 +84,7 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   struct pseudo_hdr *psed = (struct pseudo_hdr *)(udpPacket);
   int ret;
 
+  // IP header
   ipd->ihl = IHL;
   ipd->version = IPV;
   ipd->tos = TOS;
@@ -98,12 +100,12 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
   // UDP header
   udpd->source = htons(sport);
   udpd->dest = htons(dport);
-  udpLen = 8 + payloadLen;
+  udpLen = UDPH_LEN + payloadLen;
   udpd->len = htons(udpLen);
   udpd->check = 0x0000;
   memcpy(&buf[IPH_LEN + UDPH_LEN], message, payloadLen);
 
-  // preparation for calculate the checksum
+  // Preparation for calculate the checksum
   psed->src = sip;
   psed->dst = dip;
   psed->mbz = 0;

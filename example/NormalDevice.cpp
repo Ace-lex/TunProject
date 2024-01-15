@@ -1,4 +1,6 @@
 // NormalDevice.cpp: communicate with the TUN device.
+// Usage: ./NormalDevice [filename]
+
 #include <arpa/inet.h>
 #include <assert.h>
 #include <netinet/in.h>
@@ -49,6 +51,7 @@ int main(int argc, char *argv[]) {
     if (argc == 1) {
       fgets(buffer, MAXLINE, stdin);
       payloadLen = strlen(buffer);
+      buffer[strcspn(buffer, "\n")] = 0;
     } else {
       FILE *fp = fopen(argv[1], "rb");
       payloadLen = fileSize(argv[1]);

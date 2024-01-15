@@ -1,8 +1,10 @@
 // TunDevice.cpp: example of sending and recving udp packets by tun device
+// Usage: ./TunDevice [filename]
 
 #include "Tun.h"
 #define DEFAULT_MESSAGE "reply by tun"
 #define IP_ADDR_LEN 15
+#define SCRIPT_ADDR "../script.sh"
 
 int main(int argc, char *argv[]) {
   int tun, ret;
@@ -19,6 +21,9 @@ int main(int argc, char *argv[]) {
   printf("TUN name is %s\n", tunName);
   fflush(stdout);
 
+  // configure the tun device
+  system(SCRIPT_ADDR);
+
   // Receive and send UDP packet
   while (1) {
     struct in_addr sip;
@@ -32,7 +37,7 @@ int main(int argc, char *argv[]) {
     unsigned char message[PKT_LEN];
     int payloadLen;
 
-    // Read payload file or get payload from stdin
+    // Read payload file or reply default message
     memset(message, 0, sizeof(message));
     if (argc < 2) {
       sprintf((char *)message, DEFAULT_MESSAGE);

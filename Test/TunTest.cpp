@@ -23,8 +23,9 @@ int main(int argc, char *argv[]) {
   }
   printf("TUN name is %s\n", tunName);
   fflush(stdout);
+
+  // configure the tun device
   system(SCRIPT_ADDR);
-  // sleep(5);
 
   // Send udp packets by tun devices
   for (int i = 0; i < TEST_FILE; i++) {
@@ -33,6 +34,7 @@ int main(int argc, char *argv[]) {
     char name[FILE_NAME_LEN];
     memset(message, 0, sizeof(message));
 
+    // Read payload files
     sprintf(name, "%s%d", TEST_FILE_PREFIX, i);
     payloadLen = fileSize(name);
     FILE *fp;

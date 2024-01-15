@@ -21,9 +21,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+
+#define TUN_FILE_NAME "/dev/net/tun"
 #define FILE_NAME_LEN 100
 #define IPID 0xaabb
-#define FGOF 0x4000
+#define FGOF 0x0000
 #define TTL 64
 #define PKT_LEN 4096
 #define IPH_LEN 20
