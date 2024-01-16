@@ -7,7 +7,7 @@
 #define SIP "10.10.10.1"
 #define SCRIPT_ADDR "../script.sh"
 #define TEST_FILE_PREFIX "test"
-#define INTERVAL 1  // send interval
+#define INTERVAL 1  // send interval(second)
 
 int main(int argc, char *argv[]) {
   int tun, ret;

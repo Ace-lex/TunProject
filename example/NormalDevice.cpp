@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
   while (1) {
     // Read payload file or get payload from stdin
     if (argc == 1) {
+      printf("input payload: ");
       fgets(buffer, MAXLINE, stdin);
       payloadLen = strlen(buffer);
       buffer[strcspn(buffer, "\n")] = 0;

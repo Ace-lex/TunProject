@@ -16,7 +16,7 @@
 #define IBH_LEN 20
 #define OPCODE 100  // UD SEND
 #define TEST_FILE_PREFIX "test"
-#define INTERVAL 1  // send interval
+#define INTERVAL 1  // send interval(second)
 #define SCRIPT_ADDR "../script.sh"
 
 // the struct of BTH
