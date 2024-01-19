@@ -36,7 +36,7 @@ int main() {
     fclose(fp);
 
     // Check length correction
-    assert(n != fileLen);
+    assert(n == fileLen);
 
     // Check payload correction
     for (int j = 0; j < fileLen; j++) {
