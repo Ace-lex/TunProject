@@ -24,7 +24,7 @@ int tunCreate(char *dev, int flags) {
 }
 
 // Return the file size
-int fileSize(char *filename) {
+int fileSize(const char *filename) {
   struct stat statbuf;
   stat(filename, &statbuf);
   int size = statbuf.st_size;
@@ -69,7 +69,7 @@ uint16_t calculateChecksum(uint8_t *packet, size_t length) {
 // The function can also internally create a buffer 'buf'
 // and only pass the 'message' parameter.
 int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
-               int dport, unsigned char *buf, unsigned char *message,
+               int dport, unsigned char *buf, const unsigned char *message,
                int payloadLen) {
   u_int32_t sip, dip;
   unsigned short udpLen;

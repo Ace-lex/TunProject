@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   socklen_t len = (socklen_t)sizeof(servaddr);  // len is value/resuslt
 
   // Send message
-  while (1) {
+  while (true) {
     // Read payload file or get payload from stdin
     if (argc == 1) {
       printf("input payload: ");

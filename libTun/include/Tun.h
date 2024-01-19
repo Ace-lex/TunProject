@@ -48,9 +48,9 @@ struct pseudo_hdr {
 };
 
 int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
-               int dport, unsigned char *buf, unsigned char *message,
+               int dport, unsigned char *buf, const unsigned char *message,
                int payloadLen);
-int fileSize(char *filename);
+int fileSize(const char *filename);
 int tunCreate(char *dev, int flags);
 socklen_t sockPre(int &sockfd, struct sockaddr_in &servaddr,
                   struct sockaddr_in &cliaddr, int port);

@@ -53,10 +53,10 @@ int main(int argc, char *argv[]) {
   system(SCRIPT_ADDR);
 
   // Send RoCEv2 packets
-  for (;;) {
+  while(true) {
     memset(buf, 0, sizeof(buf));
     unsigned char udpPacket[PKT_LEN];
-    char name[FILE_NAME_LEN];
+    const char name[FILE_NAME_LEN]=TEST_FILE_PREFIX;
     uint8_t protocal;
     unsigned char message[PKT_LEN];
     struct rxe_bth *bth = (struct rxe_bth *)message;
@@ -66,7 +66,6 @@ int main(int argc, char *argv[]) {
     memset(message, 0, sizeof(message));
 
     // Read payload files
-    sprintf(name, "%s", TEST_FILE_PREFIX);
     payloadLen = fileSize(name);
     FILE *fp;
     fp = fopen(name, "rb");

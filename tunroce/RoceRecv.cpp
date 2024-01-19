@@ -15,7 +15,7 @@ int main() {
   int n;
   socklen_t len = sockPre(sockfd, servaddr, cliaddr, PORT);
 
-  for (;;) {
+  while(true) {
     // Receive RoCEv2 packets
     memset(example, 0, sizeof(example));
     n = recvfrom(sockfd, buffer, PKT_LEN, MSG_WAITALL,

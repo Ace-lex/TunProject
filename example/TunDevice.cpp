@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   system(SCRIPT_ADDR);
 
   // Receive and send UDP packet
-  while (1) {
+  while (true) {
     struct in_addr sip;
     struct in_addr dip;
     char hostSip[IP_ADDR_LEN];
