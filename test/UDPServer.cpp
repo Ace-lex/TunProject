@@ -4,7 +4,8 @@
 #include "Tun.h"
 #define TEST_FILE 3
 #define PORT 8080
-#define TEST_FILE_PREFIX "test"
+#define TEST_FILE_PREFIX "./testfile/test"
+#define TEST_FILE_SUFFIX ".bin"
 
 int main() {
   int sockfd;
@@ -27,7 +28,7 @@ int main() {
                          // and UDP packet formats are correct.
 
     // Read the check file
-    sprintf(name, "%s%d", TEST_FILE_PREFIX, i);
+    sprintf(name, "%s%d%s", TEST_FILE_PREFIX, i, TEST_FILE_SUFFIX);
     FILE *fp;
     int fileLen;
     fp = fopen(name, "rb");

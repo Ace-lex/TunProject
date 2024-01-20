@@ -6,7 +6,8 @@
 #define DPORT 8080
 #define SIP "10.10.10.1"
 #define SCRIPT_ADDR "../script.sh"
-#define TEST_FILE_PREFIX "test"
+#define TEST_FILE_PREFIX "./testfile/test"
+#define TEST_FILE_SUFFIX ".bin"
 #define INTERVAL 1  // send interval(second)
 
 int main(int argc, char *argv[]) {
@@ -35,7 +36,7 @@ int main(int argc, char *argv[]) {
     memset(message, 0, sizeof(message));
 
     // Read payload files
-    sprintf(name, "%s%d", TEST_FILE_PREFIX, i);
+    sprintf(name, "%s%d%s", TEST_FILE_PREFIX, i, TEST_FILE_SUFFIX);
     payloadLen = fileSize(name);
     FILE *fp;
     fp = fopen(name, "rb");
