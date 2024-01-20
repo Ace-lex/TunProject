@@ -1,6 +1,7 @@
 // TunTest.cpp: transmission test for libTun.so.
 
 #include "Tun.h"
+
 #define TEST_FILE 3
 #define SPORT 31233
 #define DPORT 8080
@@ -13,7 +14,6 @@
 int main(int argc, char *argv[]) {
   int tun, ret;
   char tunName[IFNAMSIZ];
-  unsigned char buf[PKT_LEN];
 
   // Create tun devices
   tunName[0] = '\0';
@@ -44,8 +44,8 @@ int main(int argc, char *argv[]) {
     fclose(fp);
 
     // Send UDP packets
-    ret = udpTunSend(tun, SIP, (const char *)argv[1], SPORT, DPORT, buf,
-                     message, payloadLen);
+    ret = udpTunSend(tun, SIP, (const char *)argv[1], SPORT, DPORT, message,
+                     payloadLen);
 
     // Ensure successful reception at the receiving end.
     sleep(INTERVAL);

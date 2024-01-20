@@ -2,6 +2,7 @@
 // correctness
 
 #include "Tun.h"
+
 #define TEST_FILE 3
 #define PORT 8080
 #define TEST_FILE_PREFIX "./testfile/test"
@@ -17,7 +18,7 @@ int main() {
   int n;
 
   // Preparation for receiving
-  socklen_t len = sockPre(sockfd, servaddr, cliaddr, PORT);
+  socklen_t len = sockPre(&sockfd, &servaddr, &cliaddr, PORT);
 
   for (int i = 0; i < TEST_FILE; i++) {
     // Receive the packets

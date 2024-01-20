@@ -1,6 +1,7 @@
 // RoceSend.cpp: Send basic RoCEv2 packet using libTun.so
 
 #include "Tun.h"
+
 #define SIP "10.10.10.1"
 #define DIP "192.168.0.39"
 #define SPORT 31233
@@ -37,7 +38,6 @@ struct rxe_deth {
 int main(int argc, char *argv[]) {
   int tun, ret;
   char tunName[IFNAMSIZ];
-  unsigned char buf[PKT_LEN];
 
   // Create tun device
   tunName[0] = '\0';
@@ -53,10 +53,9 @@ int main(int argc, char *argv[]) {
   system(SCRIPT_ADDR);
 
   // Send RoCEv2 packets
-  while(true) {
-    memset(buf, 0, sizeof(buf));
+  while (true) {
     unsigned char udpPacket[PKT_LEN];
-    const char name[FILE_NAME_LEN]=TEST_FILE_PREFIX;
+    const char name[FILE_NAME_LEN] = TEST_FILE_PREFIX;
     uint8_t protocal;
     unsigned char message[PKT_LEN];
     struct rxe_bth *bth = (struct rxe_bth *)message;
@@ -88,7 +87,7 @@ int main(int argc, char *argv[]) {
     deth->sqp = htonl(SQP & BTH_QPN_MASK);
 
     // Send packet
-    ret = udpTunSend(tun, SIP, DIP, SPORT, DPORT, buf, message,
+    ret = udpTunSend(tun, SIP, DIP, SPORT, DPORT, message,
                      payloadLen + sizeof(rxe_bth) + sizeof(rxe_deth));
 
     printf("write %d bytes\n", ret);

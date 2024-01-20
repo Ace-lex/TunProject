@@ -33,10 +33,9 @@ int fileSize(const char *filename) {
 }
 
 // Calculate the ip/udp checksum
-uint16_t calculateChecksum(uint8_t *packet, size_t length) {
+uint16_t calculateChecksum(const unsigned char *packet, size_t length) {
   //  If the length of the UDP datagram is odd, add a zero byte.
   if (length % 2 != 0) {
-    packet[length] = '\0';
     length++;
   }
 
@@ -69,13 +68,13 @@ uint16_t calculateChecksum(uint8_t *packet, size_t length) {
 // The function can also internally create a buffer 'buf'
 // and only pass the 'message' parameter.
 int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
-               int dport, unsigned char *buf, const unsigned char *message,
-               int payloadLen) {
+               int dport, const unsigned char *message, int payloadLen) {
   u_int32_t sip, dip;
   unsigned short udpLen;
   unsigned short udpCheckSum;
   unsigned short ipCheckSum;
-  unsigned char udpPacket[PKT_LEN];
+  unsigned char buf[PKT_LEN] = {0};
+  unsigned char udpPacket[PKT_LEN] = {0};
   char name[FILE_NAME_LEN];
   uint8_t protocal;
   struct iphdr *ipd = (struct iphdr *)(buf);
@@ -130,26 +129,27 @@ int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
 }
 
 // Create socket for receive packets sended by tun devices
-socklen_t sockPre(int &sockfd, struct sockaddr_in &servaddr,
-                  struct sockaddr_in &cliaddr, int port) {
+socklen_t sockPre(int *sockfd, struct sockaddr_in *servaddr,
+                  struct sockaddr_in *cliaddr, int port) {
   // socket file description
-  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+  if (((*sockfd) = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("socket creation failed");
     exit(EXIT_FAILURE);
   }
 
-  memset(&servaddr, 0, sizeof(servaddr));
-  memset(&cliaddr, 0, sizeof(cliaddr));
+  memset(servaddr, 0, sizeof(struct sockaddr_in));
+  memset(cliaddr, 0, sizeof(struct sockaddr_in));
 
   // Populate server information.
-  servaddr.sin_family = AF_INET;  // IPv4
-  servaddr.sin_addr.s_addr = INADDR_ANY;
-  servaddr.sin_port = htons(port);
+  servaddr->sin_family = AF_INET;  // IPv4
+  servaddr->sin_addr.s_addr = INADDR_ANY;
+  servaddr->sin_port = htons(port);
 
   // Bind the server information to the socket
-  if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+  if (bind(*sockfd, (const struct sockaddr *)servaddr, sizeof(sockaddr_in)) <
+      0) {
     perror("bind failed");
     exit(EXIT_FAILURE);
   }
-  return (socklen_t)sizeof(cliaddr);
+  return (socklen_t)sizeof(sockaddr_in);
 }
