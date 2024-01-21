@@ -2,6 +2,21 @@
 
 #include "Tun.h"
 
+#include <assert.h>
+
+#define TUN_FILE_NAME "/dev/net/tun"
+#define FILE_NAME_LEN 100
+#define IPID 0xaabb
+#define FGOF 0x0000
+#define TTL 64
+#define PKT_LEN 4096
+#define IPH_LEN 20
+#define UDPH_LEN 8
+#define PSE_UDPH_LEN 12
+#define IPV 4
+#define IHL 5
+#define TOS 0
+
 // Create a tun device, returning the file description of the device
 int tunCreate(char *dev, int flags) {
   struct ifreq ifr;
@@ -33,7 +48,7 @@ int fileSize(const char *filename) {
 }
 
 // Calculate the ip/udp checksum
-uint16_t calculateChecksum(const unsigned char *packet, size_t length) {
+uint16_t calculateChecksum(const uint8_t *packet, size_t length) {
   //  If the length of the UDP datagram is odd, add a zero byte.
   if (length % 2 != 0) {
     length++;
@@ -68,20 +83,24 @@ uint16_t calculateChecksum(const unsigned char *packet, size_t length) {
 // The function can also internally create a buffer 'buf'
 // and only pass the 'message' parameter.
 int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
-               int dport, const unsigned char *message, int payloadLen) {
-  u_int32_t sip, dip;
-  unsigned short udpLen;
-  unsigned short udpCheckSum;
-  unsigned short ipCheckSum;
-  unsigned char buf[PKT_LEN] = {0};
-  unsigned char udpPacket[PKT_LEN] = {0};
+               int dport, const u_int8_t *message, int payloadLen) {
+  uint32_t sip, dip;
+  int udpLen;
+  int udpCheckSum;
+  int ipCheckSum;
+  uint8_t buf[PKT_LEN] = {0};
+  uint8_t udpPacket[PKT_LEN] = {0};
   char name[FILE_NAME_LEN];
   uint8_t protocal;
   struct iphdr *ipd = (struct iphdr *)(buf);
   struct udphdr *udpd = (struct udphdr *)(buf + sizeof(struct iphdr));
-  unsigned short totLen;
+  int totLen;
   struct pseudo_hdr *psed = (struct pseudo_hdr *)(udpPacket);
   int ret;
+
+  // Check the parameter
+  assert(sport >= 0 && dport >= 0);
+  assert(payloadLen >= 0);
 
   // IP header
   ipd->ihl = IHL;

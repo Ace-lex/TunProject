@@ -6,11 +6,13 @@
 #define DEFAULT_MESSAGE "reply by tun"
 #define IP_ADDR_LEN 15
 #define SCRIPT_ADDR "../script.sh"
+#define PKT_LEN 4096
+#define IPH_LEN 20
 
 int main(int argc, char *argv[]) {
   int tun, ret;
   char tunName[IFNAMSIZ];
-  unsigned char recvBuf[PKT_LEN];
+  uint8_t recvBuf[PKT_LEN];
 
   // Create tun device
   tunName[0] = '\0';
@@ -33,9 +35,9 @@ int main(int argc, char *argv[]) {
     char hostDip[IP_ADDR_LEN];
     struct iphdr *recvIph = (struct iphdr *)(recvBuf);
     struct udphdr *recvUdph = (struct udphdr *)(recvBuf + IPH_LEN);
-    unsigned char udpPacket[PKT_LEN];
+    uint8_t udpPacket[PKT_LEN];
     uint8_t protocal;
-    unsigned char message[PKT_LEN];
+    uint8_t message[PKT_LEN];
     int payloadLen;
 
     // Read payload file or reply default message

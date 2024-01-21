@@ -1,24 +1,33 @@
 // UDPServer.cpp: receive udp packet sended by tun device and check for
 // correctness
 
+#include <sys/time.h>
+
 #include "Tun.h"
 
 #define TEST_FILE 3
 #define PORT 8080
 #define TEST_FILE_PREFIX "./testfile/test"
 #define TEST_FILE_SUFFIX ".bin"
+#define WAIT_TIME 10
+#define PKT_LEN 4096
+#define FILE_NAME_LEN 100
 
 int main() {
   int sockfd;
-  unsigned char buffer[PKT_LEN];
+  struct timeval tv;
+  tv.tv_sec = WAIT_TIME;
+  tv.tv_usec = 0;
+  uint8_t buffer[PKT_LEN];
   char sendbuffer[PKT_LEN];
-  unsigned char example[PKT_LEN];
+  uint8_t example[PKT_LEN];
   struct sockaddr_in servaddr, cliaddr;
   char name[FILE_NAME_LEN];
   int n;
 
   // Preparation for receiving
   socklen_t len = sockPre(&sockfd, &servaddr, &cliaddr, PORT);
+  setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
   for (int i = 0; i < TEST_FILE; i++) {
     // Receive the packets

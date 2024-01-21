@@ -19,6 +19,9 @@
 #define TEST_FILE_PREFIX "test"
 #define INTERVAL 1  // send interval(second)
 #define SCRIPT_ADDR "../script.sh"
+#define FILE_NAME_LEN 100
+#define PKT_LEN 4096
+#define PSE_UDPH_LEN 12
 
 // the struct of BTH
 struct rxe_bth {
@@ -54,14 +57,14 @@ int main(int argc, char *argv[]) {
 
   // Send RoCEv2 packets
   while (true) {
-    unsigned char udpPacket[PKT_LEN];
+    uint8_t udpPacket[PKT_LEN];
     const char name[FILE_NAME_LEN] = TEST_FILE_PREFIX;
     uint8_t protocal;
-    unsigned char message[PKT_LEN];
+    uint8_t message[PKT_LEN];
     struct rxe_bth *bth = (struct rxe_bth *)message;
     struct rxe_deth *deth = (struct rxe_deth *)&message[PSE_UDPH_LEN];
     int payloadLen;
-    unsigned char setPadCnt;
+    uint8_t setPadCnt;
     memset(message, 0, sizeof(message));
 
     // Read payload files

@@ -10,6 +10,8 @@
 #define TEST_FILE_PREFIX "./testfile/test"
 #define TEST_FILE_SUFFIX ".bin"
 #define INTERVAL 1  // send interval(second)
+#define PKT_LEN 4096
+#define FILE_NAME_LEN 100
 
 int main(int argc, char *argv[]) {
   int tun, ret;
