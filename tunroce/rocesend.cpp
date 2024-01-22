@@ -1,6 +1,6 @@
 // RoceSend.cpp: Send basic RoCEv2 packet using libTun.so
 
-#include "Tun.h"
+#include "tun.h"
 
 #define SIP "10.10.10.1"
 #define DIP "192.168.0.39"
@@ -17,11 +17,12 @@
 #define IBH_LEN 20
 #define OPCODE 100  // UD SEND
 #define TEST_FILE_PREFIX "test"
-#define INTERVAL 1  // send interval(second)
 #define SCRIPT_ADDR "../script.sh"
-#define FILE_NAME_LEN 100
-#define PKT_LEN 4096
-#define PSE_UDPH_LEN 12
+
+const int kInternal = 1;  // send interval(second)
+const int kFileNameLen = 100;
+const int kPacketLen = 4096;
+const int kPseudoHeaderLen = 12;
 
 // the struct of BTH
 struct rxe_bth {
@@ -44,7 +45,7 @@ int main(int argc, char *argv[]) {
 
   // Create tun device
   tunName[0] = '\0';
-  tun = tunCreate(tunName, IFF_TUN | IFF_NO_PI);
+  tun = TunCreate(tunName, IFF_TUN | IFF_NO_PI);
   if (tun < 0) {
     perror("tunCreate");
     return 1;
@@ -57,18 +58,18 @@ int main(int argc, char *argv[]) {
 
   // Send RoCEv2 packets
   while (true) {
-    uint8_t udpPacket[PKT_LEN];
-    const char name[FILE_NAME_LEN] = TEST_FILE_PREFIX;
+    uint8_t udpPacket[kPacketLen];
+    const char name[kFileNameLen] = TEST_FILE_PREFIX;
     uint8_t protocal;
-    uint8_t message[PKT_LEN];
+    uint8_t message[kPacketLen];
     struct rxe_bth *bth = (struct rxe_bth *)message;
-    struct rxe_deth *deth = (struct rxe_deth *)&message[PSE_UDPH_LEN];
+    struct rxe_deth *deth = (struct rxe_deth *)&message[kPseudoHeaderLen];
     int payloadLen;
     uint8_t setPadCnt;
     memset(message, 0, sizeof(message));
 
     // Read payload files
-    payloadLen = fileSize(name);
+    payloadLen = FileSize(name);
     FILE *fp;
     fp = fopen(name, "rb");
     fread(message + IBH_LEN, 1, payloadLen, fp);
@@ -90,13 +91,13 @@ int main(int argc, char *argv[]) {
     deth->sqp = htonl(SQP & BTH_QPN_MASK);
 
     // Send packet
-    ret = udpTunSend(tun, SIP, DIP, SPORT, DPORT, message,
+    ret = UDPTunSend(tun, SIP, DIP, SPORT, DPORT, message,
                      payloadLen + sizeof(rxe_bth) + sizeof(rxe_deth));
 
     printf("write %d bytes\n", ret);
     fflush(stdout);
     //  Ensure successful reception at the receiving end.
-    sleep(INTERVAL);
+    sleep(kInternal);
   }
 
   return 0;

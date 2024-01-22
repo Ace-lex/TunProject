@@ -1,22 +1,22 @@
 // TunDevice.cpp: example of sending and recving udp packets by tun device
 // Usage: ./TunDevice [filename]
 
-#include "Tun.h"
+#include "tun.h"
 
 #define DEFAULT_MESSAGE "reply by tun"
 #define IP_ADDR_LEN 15
 #define SCRIPT_ADDR "../script.sh"
-#define PKT_LEN 4096
-#define IPH_LEN 20
+const int kIPHeaderLen = 20;
+const int kPacketLen = 4096;
 
 int main(int argc, char *argv[]) {
   int tun, ret;
   char tunName[IFNAMSIZ];
-  uint8_t recvBuf[PKT_LEN];
+  uint8_t recvBuf[kPacketLen];
 
   // Create tun device
   tunName[0] = '\0';
-  tun = tunCreate(tunName, IFF_TUN | IFF_NO_PI);
+  tun = TunCreate(tunName, IFF_TUN | IFF_NO_PI);
   if (tun < 0) {
     perror("tun_create");
     return 1;
@@ -34,10 +34,10 @@ int main(int argc, char *argv[]) {
     char hostSip[IP_ADDR_LEN];
     char hostDip[IP_ADDR_LEN];
     struct iphdr *recvIph = (struct iphdr *)(recvBuf);
-    struct udphdr *recvUdph = (struct udphdr *)(recvBuf + IPH_LEN);
-    uint8_t udpPacket[PKT_LEN];
+    struct udphdr *recvUdph = (struct udphdr *)(recvBuf + kIPHeaderLen);
+    uint8_t udpPacket[kPacketLen];
     uint8_t protocal;
-    uint8_t message[PKT_LEN];
+    uint8_t message[kPacketLen];
     int payloadLen;
 
     // Read payload file or reply default message
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
       sprintf((char *)message, DEFAULT_MESSAGE);
       payloadLen = strlen((char *)message);
     } else {
-      payloadLen = fileSize(argv[1]);
+      payloadLen = FileSize(argv[1]);
       FILE *fp;
       fp = fopen(argv[1], "rb");
       fread(message, 1, payloadLen, fp);
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
              ntohs(recvUdph->source), ntohs(recvUdph->len));
 
       // Reply UDP packet
-      ret = udpTunSend(tun, hostSip, hostDip, ntohs(recvUdph->dest),
+      ret = UDPTunSend(tun, hostSip, hostDip, ntohs(recvUdph->dest),
                        ntohs(recvUdph->source), message, payloadLen);
 
       printf("write %d bytes\n", ret);

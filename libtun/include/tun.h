@@ -34,10 +34,10 @@ struct pseudo_hdr {
   short int len;  // length of udp packet
 };
 
-int udpTunSend(int tun, const char *hostSip, const char *hostDip, int sport,
-               int dport, const u_int8_t *message, int payloadLen);
-int fileSize(const char *filename);
-int tunCreate(char *dev, int flags);
-socklen_t sockPre(int *sockfd, struct sockaddr_in *servaddr,
-                  struct sockaddr_in *cliaddr, int port);
+int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
+               int dest_port, const u_int8_t *message, int payload_length);
+int FileSize(const char *filename);
+int TunCreate(char *dev, int flags);
+socklen_t SockPrepare(int *sock_fd, struct sockaddr_in *server_addr,
+                      struct sockaddr_in *client_addr, int port);
 #endif

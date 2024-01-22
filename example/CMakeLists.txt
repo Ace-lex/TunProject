@@ -1,5 +1,5 @@
-add_executable(NormalDevice NormalDevice.cpp)
-add_executable(TunDevice TunDevice.cpp)
+add_executable(normaldevice normaldevice.cpp)
+add_executable(tundevice tundevice.cpp)
 
-target_link_libraries(TunDevice PRIVATE Tun)
-target_link_libraries(NormalDevice PRIVATE Tun)
+target_link_libraries(tundevice PRIVATE tun)
+target_link_libraries(normaldevice PRIVATE tun)

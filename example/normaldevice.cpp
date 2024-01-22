@@ -16,7 +16,7 @@
 #define MAXLINE 1024
 #define DST_IP "10.10.10.1"
 
-int fileSize(char *filename) {
+int FileSize(char *filename) {
   struct stat statbuf;
   stat(filename, &statbuf);
   int size = statbuf.st_size;
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
       buffer[strcspn(buffer, "\n")] = 0;
     } else {
       FILE *fp = fopen(argv[1], "rb");
-      payloadLen = fileSize(argv[1]);
+      payloadLen = FileSize(argv[1]);
       fread(buffer, 1, payloadLen, fp);
       fclose(fp);
     }
