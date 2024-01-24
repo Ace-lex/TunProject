@@ -3,77 +3,76 @@
 
 #include "tun.h"
 
-#define DEFAULT_MESSAGE "reply by tun"
-#define IP_ADDR_LEN 15
-#define SCRIPT_ADDR "../script.sh"
+const char *const kDefaultMessage = "reply by tun";
+const int kIPAddrLen = 15;
+const char *kScriptAddr = "../script.sh";
 const int kIPHeaderLen = 20;
 const int kPacketLen = 4096;
 
 int main(int argc, char *argv[]) {
   int tun, ret;
-  char tunName[IFNAMSIZ];
-  uint8_t recvBuf[kPacketLen];
+  char tun_name[IFNAMSIZ];
+  uint8_t recv_buf[kPacketLen];
 
   // Create tun device
-  tunName[0] = '\0';
-  tun = TunCreate(tunName, IFF_TUN | IFF_NO_PI);
+  tun_name[0] = '\0';
+  tun = TunCreate(tun_name, IFF_TUN | IFF_NO_PI);
   if (tun < 0) {
     perror("tun_create");
     return 1;
   }
-  printf("TUN name is %s\n", tunName);
+  printf("TUN name is %s\n", tun_name);
   fflush(stdout);
 
   // configure the tun device
-  system(SCRIPT_ADDR);
+  system(kScriptAddr);
 
   // Receive and send UDP packet
   while (true) {
-    struct in_addr sip;
-    struct in_addr dip;
-    char hostSip[IP_ADDR_LEN];
-    char hostDip[IP_ADDR_LEN];
-    struct iphdr *recvIph = (struct iphdr *)(recvBuf);
-    struct udphdr *recvUdph = (struct udphdr *)(recvBuf + kIPHeaderLen);
-    uint8_t udpPacket[kPacketLen];
+    struct in_addr src_ip;
+    struct in_addr dst_ip;
+    char reply_src_ip[kIPAddrLen];
+    char reply_dst_ip[kIPAddrLen];
+    struct iphdr *recv_IP_header = (struct iphdr *)(recv_buf);
+    struct udphdr *recv_UDP_header = (struct udphdr *)(recv_buf + kIPHeaderLen);
     uint8_t protocal;
     uint8_t message[kPacketLen];
-    int payloadLen;
+    int payload_len;
 
     // Read payload file or reply default message
     memset(message, 0, sizeof(message));
     if (argc < 2) {
-      sprintf((char *)message, DEFAULT_MESSAGE);
-      payloadLen = strlen((char *)message);
+      sprintf((char *)message, kDefaultMessage);
+      payload_len = strlen((char *)message);
     } else {
-      payloadLen = FileSize(argv[1]);
+      payload_len = FileSize(argv[1]);
       FILE *fp;
       fp = fopen(argv[1], "rb");
-      fread(message, 1, payloadLen, fp);
+      fread(message, 1, payload_len, fp);
       fclose(fp);
     }
 
     // Receive packet using tun device
-    ret = read(tun, recvBuf, sizeof(recvBuf));
+    ret = read(tun, recv_buf, sizeof(recv_buf));
     if (ret < 0) break;
-    protocal = recvIph->protocol;
+    protocal = recv_IP_header->protocol;
     printf("read %d bytes ", ret);
     fflush(stdout);
-    memcpy(&sip, &recvIph->saddr, sizeof(in_addr));
-    strcpy(hostDip, (const char *)inet_ntoa(sip));
-    printf("from %s\n", hostDip);
+    memcpy(&src_ip, &recv_IP_header->saddr, sizeof(in_addr));
+    strcpy(reply_dst_ip, (const char *)inet_ntoa(src_ip));
+    printf("from %s\n", reply_dst_ip);
     fflush(stdout);
-    memcpy(&dip, &recvIph->daddr, sizeof(in_addr));
-    strcpy(hostSip, (const char *)inet_ntoa(dip));
+    memcpy(&dst_ip, &recv_IP_header->daddr, sizeof(in_addr));
+    strcpy(reply_src_ip, (const char *)inet_ntoa(dst_ip));
 
     // Check whether the received data packet is a UDP packet.
     if (protocal == IPPROTO_UDP) {
       printf("Received udp packet, source port is %d, payload size is %d, ",
-             ntohs(recvUdph->source), ntohs(recvUdph->len));
+             ntohs(recv_UDP_header->source), ntohs(recv_UDP_header->len));
 
       // Reply UDP packet
-      ret = UDPTunSend(tun, hostSip, hostDip, ntohs(recvUdph->dest),
-                       ntohs(recvUdph->source), message, payloadLen);
+      ret = UDPTunSend(tun, reply_src_ip, reply_dst_ip, ntohs(recv_UDP_header->dest),
+                       ntohs(recv_UDP_header->source), message, payload_len);
 
       printf("write %d bytes\n", ret);
       fflush(stdout);

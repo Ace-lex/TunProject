@@ -2,25 +2,24 @@
 
 #include "tun.h"
 
-#define SIP "10.10.10.1"
-#define DIP "192.168.0.39"
-#define SPORT 31233
-#define DPORT 4791
-#define BTH_DEF_PKEY (0xffff)
-#define DQPN 0x012c3f
-#define PSN 0x123456
-#define BTH_FLAG_MASK 0x40
-#define BTH_PSN_MASK (0x00ffffff)
-#define BTH_QPN_MASK (0x00ffffff)
-#define QKEY 0x1ee7a330
-#define SQP 0x012c41
-#define IBH_LEN 20
-#define OPCODE 100  // UD SEND
-#define TEST_FILE_PREFIX "test"
-#define SCRIPT_ADDR "../script.sh"
+const char *const kSrcIP = "10.10.10.1";
+const char *const kDstIP = "192.168.0.39";
+const int kSrcPort = 31233;
+const int kDstPort = 4791;
+const int kPartitionKey = 0xffff;
+const int kDstQPN = 0x012c3f;
+const int kPacketNum = 0x123456;
+const int kFlagMask = 0x00ffffff;
+const int kPSNMask = 0x00ffffff;
+const int kQPNMask = 0x00ffffff;
 
+const int kQueueKey = 0x1ee7a330;
+const int kSrcQP = 0x012c41;
+const int kIBHeaderLen = 20;
+const uint8_t kOpcode = 100;
+const char *const kTestFilePrefix = "test";
+const char *kScriptAddr = "../script.sh";
 const int kInternal = 1;  // send interval(second)
-const int kFileNameLen = 100;
 const int kPacketLen = 4096;
 const int kPseudoHeaderLen = 12;
 
@@ -41,58 +40,58 @@ struct rxe_deth {
 
 int main(int argc, char *argv[]) {
   int tun, ret;
-  char tunName[IFNAMSIZ];
+  char tun_name[IFNAMSIZ];
 
   // Create tun device
-  tunName[0] = '\0';
-  tun = TunCreate(tunName, IFF_TUN | IFF_NO_PI);
+  tun_name[0] = '\0';
+  tun = TunCreate(tun_name, IFF_TUN | IFF_NO_PI);
   if (tun < 0) {
     perror("tunCreate");
     return 1;
   }
-  printf("TUN name is %s\n", tunName);
+  printf("TUN name is %s\n", tun_name);
   fflush(stdout);
 
   // configure the tun device
-  system(SCRIPT_ADDR);
+  system(kScriptAddr);
 
   // Send RoCEv2 packets
   while (true) {
-    uint8_t udpPacket[kPacketLen];
-    const char name[kFileNameLen] = TEST_FILE_PREFIX;
+    uint8_t udp_packet[kPacketLen];
+    const char *name = kTestFilePrefix;
     uint8_t protocal;
     uint8_t message[kPacketLen];
     struct rxe_bth *bth = (struct rxe_bth *)message;
     struct rxe_deth *deth = (struct rxe_deth *)&message[kPseudoHeaderLen];
-    int payloadLen;
-    uint8_t setPadCnt;
+    int payload_len;
+    uint8_t pad_cnt;
     memset(message, 0, sizeof(message));
 
     // Read payload files
-    payloadLen = FileSize(name);
+    payload_len = FileSize(name);
     FILE *fp;
     fp = fopen(name, "rb");
-    fread(message + IBH_LEN, 1, payloadLen, fp);
+    fread(message + kIBHeaderLen, 1, payload_len, fp);
     fclose(fp);
-    if (payloadLen % 4 != 0) {
-      setPadCnt = (payloadLen % 4) << 4;
-      payloadLen = payloadLen + 4 - payloadLen % 4;
+    if (payload_len % 4 != 0) {
+      pad_cnt = (payload_len % 4) << 4;
+      payload_len = payload_len + 4 - payload_len % 4;
     }
 
     // Infiniband BTH
-    bth->opcode = OPCODE;
-    bth->flags = BTH_FLAG_MASK | setPadCnt;
-    bth->pkey = htons(BTH_DEF_PKEY);
-    bth->qpn = htonl(DQPN & BTH_QPN_MASK);
-    bth->apsn = htonl(PSN & BTH_PSN_MASK);
+    bth->opcode = kOpcode;
+    bth->flags = kFlagMask | pad_cnt;
+    bth->pkey = htons(kPartitionKey);
+    bth->qpn = htonl(kDstQPN & kQPNMask);
+    bth->apsn = htonl(kPacketNum & kPSNMask);
 
     // DETH
-    deth->qkey = htonl(QKEY);
-    deth->sqp = htonl(SQP & BTH_QPN_MASK);
+    deth->qkey = htonl(kQueueKey);
+    deth->sqp = htonl(kSrcQP & kQPNMask);
 
     // Send packet
-    ret = UDPTunSend(tun, SIP, DIP, SPORT, DPORT, message,
-                     payloadLen + sizeof(rxe_bth) + sizeof(rxe_deth));
+    ret = UDPTunSend(tun, kSrcIP, kDstIP, kSrcPort, kDstPort, message,
+                     payload_len + sizeof(rxe_bth) + sizeof(rxe_deth));
 
     printf("write %d bytes\n", ret);
     fflush(stdout);

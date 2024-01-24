@@ -12,67 +12,67 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define PORT 8080
-#define MAXLINE 1024
-#define DST_IP "10.10.10.1"
+const int kListenPort = 8080;
+const int kPacketLen = 4096;
+const char *const kDestIP = "10.10.10.1";
 
 int FileSize(char *filename) {
-  struct stat statbuf;
-  stat(filename, &statbuf);
-  int size = statbuf.st_size;
+  struct stat stat_buf;
+  stat(filename, &stat_buf);
+  int size = stat_buf.st_size;
 
   return size;
 }
 
 int main(int argc, char *argv[]) {
-  int sockfd;
-  char buffer[MAXLINE];
-  struct sockaddr_in servaddr;
-  int payloadLen;
+  int sock_fd;
+  char buffer[kPacketLen];
+  struct sockaddr_in server_addr;
+  int payload_len;
 
   // Create the socket file description
-  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+  if ((sock_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("socket creation failed");
     exit(EXIT_FAILURE);
   }
   // printf("socket successfully built\n");
-  memset(&servaddr, 0, sizeof(servaddr));
+  memset(&server_addr, 0, sizeof(server_addr));
 
   // Populate the server information
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_port = htons(PORT);
-  servaddr.sin_addr.s_addr = inet_addr(DST_IP);
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = htons(kListenPort);
+  server_addr.sin_addr.s_addr = inet_addr(kDestIP);
 
-  socklen_t len = (socklen_t)sizeof(servaddr);  // len is value/resuslt
+  socklen_t len = (socklen_t)sizeof(server_addr);  // len is value/resuslt
 
   // Send message
   while (true) {
     // Read payload file or get payload from stdin
     if (argc == 1) {
       printf("input payload: ");
-      fgets(buffer, MAXLINE, stdin);
-      payloadLen = strlen(buffer);
+      fgets(buffer, kPacketLen, stdin);
+      payload_len = strlen(buffer);
       buffer[strcspn(buffer, "\n")] = 0;
     } else {
       FILE *fp = fopen(argv[1], "rb");
-      payloadLen = FileSize(argv[1]);
-      fread(buffer, 1, payloadLen, fp);
+      payload_len = FileSize(argv[1]);
+      fread(buffer, 1, payload_len, fp);
       fclose(fp);
     }
 
     // Send packets to tun device
-    sendto(sockfd, (const char *)buffer, payloadLen, 0,
-           (const struct sockaddr *)&servaddr, len);
+    sendto(sock_fd, (const char *)buffer, payload_len, 0,
+           (const struct sockaddr *)&server_addr, len);
     fprintf(stdout, "message: %s have sent.\n", buffer);
     fflush(stdout);
 
     // Receive packets from tun device
-    int n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL,
-                     (struct sockaddr *)&servaddr, &len);
+    int n = recvfrom(sock_fd, (char *)buffer, kPacketLen, MSG_WAITALL,
+                     (struct sockaddr *)&server_addr, &len);
     buffer[n] = '\0';
     printf("Server : %s\n", buffer);
   }
 
-  close(sockfd);
+  close(sock_fd);
   return 0;
 }
