@@ -1,4 +1,4 @@
-add_library(tun SHARED tun.cpp)
+add_library(tun SHARED tun.cc)
 
 message(STATUS "Current source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
 

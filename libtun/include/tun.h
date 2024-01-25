@@ -1,4 +1,3 @@
-// Tun.h: head file of the dynamic library
 #ifndef __TUN_H__
 #define __TUN_H__
 
@@ -23,9 +22,9 @@
 #include <iostream>
 
 struct pseudo_hdr {
-  u_int32_t src;  // source ip address
+  u_int32_t src_ip;  // source ip address
 
-  u_int32_t dst;  // destination ip address
+  u_int32_t dst_ip;  // destination ip address
 
   char mbz;  // zero
 
@@ -34,10 +33,10 @@ struct pseudo_hdr {
   short int len;  // length of udp packet
 };
 
+int TunCreate(char *dev, int flags);
 int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
                int dest_port, const u_int8_t *message, int payload_length);
 int FileSize(const char *filename);
-int TunCreate(char *dev, int flags);
 socklen_t SockPrepare(int *sock_fd, struct sockaddr_in *server_addr,
                       struct sockaddr_in *client_addr, int port);
 #endif

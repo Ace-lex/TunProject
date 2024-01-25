@@ -1,13 +1,16 @@
-// TunDevice.cpp: example of sending and recving udp packets by tun device
+// Example of sending and recving udp packets by tun device
 // Usage: ./TunDevice [filename]
 
 #include "tun.h"
 
-const char *const kDefaultMessage = "reply by tun";
-const int kIPAddrLen = 15;
-const char *kScriptAddr = "../script.sh";
-const int kIPHeaderLen = 20;
-const int kPacketLen = 4096;
+const char *const kDefaultMessage =
+    "reply by tun";  // The default payload of reply packets(if payload file is
+                     // not provided)
+const int kIPAddrLen = 15;  // Length of IP address in dotted decimal notation"
+const char *kScriptPath =
+    "../script.sh";           // The script path to configure tun device
+const int kIPHeaderLen = 20;  // IP header length(usually)
+const int kPacketLen = 4096;  // The max length of packet
 
 int main(int argc, char *argv[]) {
   int tun, ret;
@@ -25,7 +28,7 @@ int main(int argc, char *argv[]) {
   fflush(stdout);
 
   // configure the tun device
-  system(kScriptAddr);
+  system(kScriptPath);
 
   // Receive and send UDP packet
   while (true) {
@@ -71,7 +74,8 @@ int main(int argc, char *argv[]) {
              ntohs(recv_UDP_header->source), ntohs(recv_UDP_header->len));
 
       // Reply UDP packet
-      ret = UDPTunSend(tun, reply_src_ip, reply_dst_ip, ntohs(recv_UDP_header->dest),
+      ret = UDPTunSend(tun, reply_src_ip, reply_dst_ip,
+                       ntohs(recv_UDP_header->dest),
                        ntohs(recv_UDP_header->source), message, payload_len);
 
       printf("write %d bytes\n", ret);

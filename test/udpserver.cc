@@ -1,17 +1,17 @@
-// UDPServer.cpp: receive udp packet sended by tun device and check for
-// correctness
+// Receive the packets sended by tun and check the correctness
 
 #include <sys/time.h>
 
 #include "tun.h"
 
-const int kNumTestFile = 3;
-const int kListenPort = 8080;
-const int kPacketLen = 4096;
-const int kFileNameLen = 100;
-const char *const kTestFilePrefix = "./testfile/test";
-const char *const kTestFileSuffix = ".bin";
-const int kWaitTime = 10;
+const int kNumTestFile = 3;    // The number of test cases
+const int kRecvPort = 8080;    // The receiving port of socket
+const int kPacketLen = 4096;   // The max length of packet length
+const int kFileNameLen = 100;  // The max length of filename
+const char *const kTestFilePrefix =
+    "./testfile/test";  // The script path to configure tun device
+const char *const kTestFileSuffix = ".bin";  // The testfile suffix
+const int kWaitTime = 10;                    // The timeout of test
 
 int main() {
   int sock_fd;
@@ -25,8 +25,8 @@ int main() {
   int n;
 
   // Preparation for receiving
-  socklen_t len =
-      SockPrepare(&sock_fd, &server_addr, &client_addr, kListenPort);
+  socklen_t len = SockPrepare(&sock_fd, &server_addr, &client_addr, kRecvPort);
+  // Set the timeout of test
   setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
   for (int i = 0; i < kNumTestFile; i++) {

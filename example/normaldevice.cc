@@ -12,11 +12,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-const int kListenPort = 8080;
-const int kPacketLen = 4096;
-const char *const kDestIP = "10.10.10.1";
+const int kRecvPort = 8080;   // The recving port of socket
+const int kPacketLen = 4096;  // The max length of packet
+const char *const kDestIP =
+    "10.10.10.1";  // The destination IP of packets(tun device IP)
 
-int FileSize(char *filename) {
+int FileSize(const char *filename) {
   struct stat stat_buf;
   stat(filename, &stat_buf);
   int size = stat_buf.st_size;
@@ -40,7 +41,7 @@ int main(int argc, char *argv[]) {
 
   // Populate the server information
   server_addr.sin_family = AF_INET;
-  server_addr.sin_port = htons(kListenPort);
+  server_addr.sin_port = htons(kRecvPort);
   server_addr.sin_addr.s_addr = inet_addr(kDestIP);
 
   socklen_t len = (socklen_t)sizeof(server_addr);  // len is value/resuslt

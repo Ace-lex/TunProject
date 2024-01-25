@@ -1,5 +1,5 @@
-add_executable(tuntest tuntest.cpp)
-add_executable(udpserver udpserver.cpp)
+add_executable(tuntest tuntest.cc)
+add_executable(udpserver udpserver.cc)
 
 target_link_libraries(tuntest PRIVATE tun)
 target_link_libraries(udpserver PRIVATE tun)

@@ -1,22 +1,21 @@
-// Tun.cpp: functions used in sending udp packets by tun
+// This file defines functions used in sending udp packets by tun
 
 #include "tun.h"
 
 #include <assert.h>
 
-const char *const kTunFileName = "/dev/net/tun";
-const int kFileNameLen = 100;
-const int kIPID = 0xaabb;
-const int kFlagAndOffset = 0x4000;
-const uint8_t kTTL = 64;
-const int kPacketLen = 4096;
-const int kIPHeaderLen = 20;
-const int kUDPHeaderLen = 8;
-const int kPseudoHeaderLen = 12;
-const int8_t kIPVersion = 4;
-const int8_t kTOS = 0;
+const char *const kTunFileName = "/dev/net/tun";  // Tun device file path
+const int kIPID = 0xaabb;           // Identification of IP packets
+const int kFlagAndOffset = 0x0000;  // The IP flag
+const uint8_t kTTL = 64;            // The time to live of IP packets
+const int kPacketLen = 4096;        // The max length of the packet
+const int kIPHeaderLen = 20;        // IP header length(usually)
+const int kUDPHeaderLen = 8;        // UDP header length
+const int kPseudoHeaderLen = 12;    // Pseudo header length
+const int8_t kIPVersion = 4;        // IPv4
+const int8_t kTOS = 0;              // Type of Service(Routine)
 
-// Create a tun device, returning the file description of the device
+// Returns the tun file description of the device
 int TunCreate(char *dev, int flags) {
   struct ifreq ifr;
   int fd, err;
@@ -25,6 +24,7 @@ int TunCreate(char *dev, int flags) {
 
   if ((fd = open(kTunFileName, O_RDWR)) < 0) return fd;
 
+  // Set the device name
   memset(&ifr, 0, sizeof(ifr));
   ifr.ifr_flags |= flags;
   if (*dev != '\0') strncpy(ifr.ifr_name, dev, IFNAMSIZ);
@@ -37,7 +37,6 @@ int TunCreate(char *dev, int flags) {
   return fd;
 }
 
-// Return the file size
 int FileSize(const char *filename) {
   struct stat stat_buf;
   stat(filename, &stat_buf);
@@ -46,7 +45,7 @@ int FileSize(const char *filename) {
   return size;
 }
 
-// Calculate the ip/udp checksum
+// Returns the ip/udp checksum
 uint16_t CalculateChecksum(const uint8_t *packet, size_t length) {
   //  If the length of the UDP datagram is odd, add a zero byte.
   if (length % 2 != 0) {
@@ -73,14 +72,12 @@ uint16_t CalculateChecksum(const uint8_t *packet, size_t length) {
 }
 
 // Send udp packets by tun
-// Take in source and destination IP address and port, returning the number of
+// Given source and destination IP address and port, returning the number of
 // successfully transmitted bytes.
 
 // About buf and message: 'message' is used to convey the payload
 // There are other ways to design the API, such as retaining only 'buf' param,
 // which can save memory space but may be inconvenient to users.
-// The function can also internally create a buffer 'buf'
-// and only pass the 'message' parameter.
 int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
                int dest_port, const u_int8_t *message, int payload_length) {
   int udp_len;
@@ -88,7 +85,6 @@ int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
   int ip_checksum;
   uint8_t buf[kPacketLen] = {0};
   uint8_t udp_packet[kPacketLen] = {0};
-  char name[kFileNameLen];
   uint8_t protocal;
   struct iphdr *ip_header = (struct iphdr *)(buf);
   struct udphdr *udp_header = (struct udphdr *)(buf + sizeof(struct iphdr));
@@ -120,8 +116,8 @@ int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
   memcpy(&buf[kIPHeaderLen + kUDPHeaderLen], message, payload_length);
 
   // Preparation for calculate the checksum
-  pseudo_header->src = ip_header->saddr;
-  pseudo_header->dst = ip_header->daddr;
+  pseudo_header->src_ip = ip_header->saddr;
+  pseudo_header->dst_ip = ip_header->daddr;
   pseudo_header->mbz = 0;
   pseudo_header->protocol = IPPROTO_UDP;
   pseudo_header->len = udp_header->len;
@@ -143,7 +139,8 @@ int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
   return ret;
 }
 
-// Create socket for receive packets sended by tun devices
+// Create socket for receive packets sended by tun devices, returning the length
+// of sockaddr
 socklen_t SockPrepare(int *sock_fd, struct sockaddr_in *server_addr,
                       struct sockaddr_in *client_addr, int port) {
   // socket file description
