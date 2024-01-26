@@ -96,6 +96,7 @@ int main(int argc, char *argv[]) {
 
     printf("write %d bytes\n", ret);
     fflush(stdout);
+
     //  Ensure successful reception at the receiving end.
     sleep(kInternal);
   }
