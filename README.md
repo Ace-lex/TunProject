@@ -10,8 +10,8 @@
 
 ```shell
 cd build/example
-./TunDevice [filename]
-./NormalDevice [filename]
+./tundevice [filename]
+./normaldevice [filename]
 ```
 
 ## test
@@ -29,8 +29,8 @@ cd build/test
 
 ```shell
 cd build/tunroce
-./RoceRecv
-./RoceSend
+./rocerecv
+./rocesend
 ```
 
 ## compile
