@@ -64,7 +64,12 @@ int main() {
 
   // Receive packets from tun device and check UDPTunSend and UDPTunSendv2's
   // correctness
+  printf("====UDPTunSend(use memcpy)====\n");
+  fflush(stdout);
   RecvAndCheck(sock_fd, &client_addr, len);
+
+  printf("====UDPTunSend(use writev)====\n");
+  fflush(stdout);
   RecvAndCheck(sock_fd, &client_addr, len);
 
   return 0;
