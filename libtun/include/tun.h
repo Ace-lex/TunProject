@@ -35,7 +35,9 @@ struct pseudo_hdr {
 
 int TunCreate(char *dev, int flags);
 int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
-               int dest_port, const u_int8_t *message, int payload_length);
+               int dest_port, const uint8_t *payload, int payload_length);
+int UDPTunSendv2(int tun, const char *src_ip, const char *dest_ip, int src_port,
+                 int dest_port, const uint8_t *payload, int payload_length);
 int FileSize(const char *filename);
 socklen_t SockPrepare(int *sock_fd, struct sockaddr_in *server_addr,
                       struct sockaddr_in *client_addr, int port);

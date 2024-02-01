@@ -13,27 +13,16 @@ const char *const kTestFilePrefix =
 const char *const kTestFileSuffix = ".bin";  // The testfile suffix
 const int kWaitTime = 10;                    // The timeout of test
 
-int main() {
-  int sock_fd;
-  struct timeval tv;
-  tv.tv_sec = kWaitTime;
-  tv.tv_usec = 0;
-  uint8_t buffer[kPacketLen];
+void RecvAndCheck(int sock_fd, struct sockaddr_in *client_addr, socklen_t len) {
   uint8_t example[kPacketLen];
-  struct sockaddr_in server_addr, client_addr;
+  uint8_t buffer[kPacketLen];
   char name[kFileNameLen];
   int n;
-
-  // Preparation for receiving
-  socklen_t len = SockPrepare(&sock_fd, &server_addr, &client_addr, kRecvPort);
-  // Set the timeout of test
-  setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-
   for (int i = 0; i < kNumTestFile; i++) {
     // Receive the packets
     memset(example, 0, sizeof(example));
     n = recvfrom(sock_fd, buffer, kPacketLen, MSG_WAITALL,
-                 (struct sockaddr *)&client_addr,
+                 (struct sockaddr *)client_addr,
                  &len);  // Receiving packets successfully indicates that the IP
                          // and UDP packet formats are correct.
 
@@ -55,6 +44,28 @@ int main() {
 
     printf("Received %d bytes, test%d passed\n", n, i);
   }
+}
+
+int main() {
+  int sock_fd;
+  struct timeval tv;
+  tv.tv_sec = kWaitTime;
+  tv.tv_usec = 0;
+  uint8_t buffer[kPacketLen];
+
+  struct sockaddr_in server_addr, client_addr;
+  char name[kFileNameLen];
+  int n;
+
+  // Preparation for receiving
+  socklen_t len = SockPrepare(&sock_fd, &server_addr, &client_addr, kRecvPort);
+  // Set the timeout of test
+  setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+
+  // Receive packets from tun device and check UDPTunSend and UDPTunSendv2's
+  // correctness
+  RecvAndCheck(sock_fd, &client_addr, len);
+  RecvAndCheck(sock_fd, &client_addr, len);
 
   return 0;
 }

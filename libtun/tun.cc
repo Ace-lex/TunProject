@@ -3,17 +3,16 @@
 #include "tun.h"
 
 #include <assert.h>
+#include <sys/uio.h>
 
 const char *const kTunFileName = "/dev/net/tun";  // Tun device file path
 const int kIPID = 0xaabb;           // Identification of IP packets
 const int kFlagAndOffset = 0x0000;  // The IP flag
 const uint8_t kTTL = 64;            // The time to live of IP packets
 const int kPacketLen = 4096;        // The max length of the packet
-const int kIPHeaderLen = 20;        // IP header length(usually)
-const int kUDPHeaderLen = 8;        // UDP header length
-const int kPseudoHeaderLen = 12;    // Pseudo header length
 const int8_t kIPVersion = 4;        // IPv4
 const int8_t kTOS = 0;              // Type of Service(Routine)
+const int8_t kPacketPart = 3;  // Divide packet into 3 parts: IP + UDP + payload
 
 // Returns the tun file description of the device
 int TunCreate(char *dev, int flags) {
@@ -71,15 +70,14 @@ uint16_t CalculateChecksum(const uint8_t *packet, size_t length) {
   return checksum;
 }
 
+void SetIOVector(const struct iphdr *iph, const struct udphdr *udph,
+                 const uint8_t *payload, int payload_length) {}
+
 // Send udp packets by tun
 // Given source and destination IP address and port, returning the number of
 // successfully transmitted bytes.
-
-// About buf and message: 'message' is used to convey the payload
-// There are other ways to design the API, such as retaining only 'buf' param,
-// which can save memory space but may be inconvenient to users.
 int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
-               int dest_port, const u_int8_t *message, int payload_length) {
+               int dest_port, const uint8_t *payload, int payload_length) {
   int udp_len;
   int udp_checksum;
   int ip_checksum;
@@ -87,7 +85,7 @@ int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
   uint8_t udp_packet[kPacketLen] = {0};
   uint8_t protocal;
   struct iphdr *ip_header = (struct iphdr *)(buf);
-  struct udphdr *udp_header = (struct udphdr *)(buf + sizeof(struct iphdr));
+  struct udphdr *udp_header = (struct udphdr *)(buf + sizeof(*ip_header));
   int total_len;
   struct pseudo_hdr *pseudo_header = (struct pseudo_hdr *)(udp_packet);
   int ret;
@@ -97,7 +95,7 @@ int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
   assert(payload_length >= 0);
 
   // IP header
-  ip_header->ihl = kIPHeaderLen / 4;
+  ip_header->ihl = sizeof(*ip_header) / 4;
   ip_header->version = kIPVersion;
   ip_header->tos = kTOS;
   ip_header->id = htons(kIPID);
@@ -110,10 +108,11 @@ int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
   // UDP header
   udp_header->source = htons(src_port);
   udp_header->dest = htons(dest_port);
-  udp_len = kUDPHeaderLen + payload_length;
+  udp_len = sizeof(*udp_header) + payload_length;
   udp_header->len = htons(udp_len);
   udp_header->check = 0x0000;
-  memcpy(&buf[kIPHeaderLen + kUDPHeaderLen], message, payload_length);
+  memcpy(&buf[sizeof(*ip_header) + sizeof(*udp_header)], payload,
+         payload_length);
 
   // Preparation for calculate the checksum
   pseudo_header->src_ip = ip_header->saddr;
@@ -121,21 +120,99 @@ int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
   pseudo_header->mbz = 0;
   pseudo_header->protocol = IPPROTO_UDP;
   pseudo_header->len = udp_header->len;
-  memcpy(udp_packet + kPseudoHeaderLen, buf + kIPHeaderLen, udp_len);
+  memcpy(udp_packet + sizeof(*pseudo_header), buf + sizeof(*ip_header),
+         udp_len);
 
   // Calculate the udp checksum
-  udp_checksum = CalculateChecksum(udp_packet, udp_len + kPseudoHeaderLen);
+  udp_checksum =
+      CalculateChecksum(udp_packet, udp_len + sizeof(*pseudo_header));
   udp_header->check = htons(udp_checksum);
 
   // Calculate the ip checksum
-  total_len = kIPHeaderLen + udp_len;
+  total_len = sizeof(*ip_header) + udp_len;
   ip_header->tot_len = htons(total_len);
   ip_header->check = 0x0000;
-  ip_checksum = CalculateChecksum(buf, kIPHeaderLen);
+  ip_checksum = CalculateChecksum(buf, sizeof(*ip_header));
   ip_header->check = htons(ip_checksum);
 
   // Send udp packets
-  ret = write(tun, buf, kIPHeaderLen + udp_len);
+  ret = write(tun, buf, sizeof(*ip_header) + udp_len);
+  return ret;
+}
+
+// The function are same as UDPTunSend, but use writev system call to encapture
+// the packet
+int UDPTunSendv2(int tun, const char *src_ip, const char *dest_ip, int src_port,
+                 int dest_port, const uint8_t *payload, int payload_length) {
+  int udp_len;
+  int udp_checksum;
+  int ip_checksum;
+  uint8_t udp_packet[kPacketLen] = {0};
+  uint8_t protocal;
+  struct iphdr ip_header;
+  struct udphdr udp_header;
+  int total_len;
+  struct pseudo_hdr *pseudo_header = (struct pseudo_hdr *)(udp_packet);
+  struct iovec iov[kPacketPart];
+  int ret;
+  int ret_write_ip, ret_write_udp, ret_write_payload;
+
+  // Check the parameter
+  assert(src_port >= 0 && dest_port >= 0);
+  assert(payload_length >= 0);
+
+  // IP header
+  ip_header.ihl = sizeof(ip_header) / 4;
+  ip_header.version = kIPVersion;
+  ip_header.tos = kTOS;
+  ip_header.id = htons(kIPID);
+  ip_header.frag_off = htons(kFlagAndOffset);
+  ip_header.ttl = kTTL;
+  ip_header.protocol = IPPROTO_UDP;
+  ip_header.saddr = inet_addr(src_ip);
+  ip_header.daddr = inet_addr(dest_ip);
+
+  // UDP header
+  udp_header.source = htons(src_port);
+  udp_header.dest = htons(dest_port);
+  udp_len = sizeof(udp_header) + payload_length;
+  udp_header.len = htons(udp_len);
+  udp_header.check = 0x0000;
+
+  // Preparation for calculate the checksum
+  pseudo_header->src_ip = ip_header.saddr;
+  pseudo_header->dst_ip = ip_header.daddr;
+  pseudo_header->mbz = 0;
+  pseudo_header->protocol = IPPROTO_UDP;
+  pseudo_header->len = udp_header.len;
+  memcpy(udp_packet + sizeof(*pseudo_header), &udp_header, sizeof(udp_header));
+  memcpy(udp_packet + sizeof(*pseudo_header) + sizeof(udp_header), payload,
+         payload_length);
+
+  // Calculate the udp checksum
+  udp_checksum =
+      CalculateChecksum(udp_packet, udp_len + sizeof(*pseudo_header));
+  udp_header.check = htons(udp_checksum);
+
+  // Calculate the ip checksum
+  total_len = sizeof(ip_header) + udp_len;
+  ip_header.tot_len = htons(total_len);
+  ip_header.check = 0x0000;
+  ip_checksum =
+      CalculateChecksum((const uint8_t *)&ip_header, sizeof(ip_header));
+  ip_header.check = htons(ip_checksum);
+
+  // Send udp packets
+  iov[0].iov_base = &ip_header;
+  iov[0].iov_len = sizeof(ip_header);
+  iov[1].iov_base = &udp_header;
+  iov[1].iov_len = sizeof(udp_header);
+  iov[2].iov_base = (void *)payload;
+  iov[2].iov_len = payload_length;
+  ret = writev(tun, iov, kPacketPart);
+  if (ret < 0) {
+    fprintf(stderr, "Error sending packets: %s\n", strerror(errno));
+  }
   return ret;
 }
 
