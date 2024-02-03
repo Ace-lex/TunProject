@@ -137,6 +137,9 @@ int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
 
   // Send udp packets
   ret = write(tun, buf, sizeof(*ip_header) + udp_len);
+  if (ret < 0) {
+    fprintf(stderr, "Error sending packets: %s\n", strerror(errno));
+  }
   return ret;
 }
 
@@ -155,7 +158,6 @@ int UDPTunSendv2(int tun, const char *src_ip, const char *dest_ip, int src_port,
   struct pseudo_hdr *pseudo_header = (struct pseudo_hdr *)(udp_packet);
   struct iovec iov[kPacketPart];
   int ret;
-  int ret_write_ip, ret_write_udp, ret_write_payload;
 
   // Check the parameter
   assert(src_port >= 0 && dest_port >= 0);

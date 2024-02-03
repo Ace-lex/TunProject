@@ -18,7 +18,7 @@ const int kPacketLen = 4096;   // The max length of packet length
 void TestUDPTunSend(int tun, const char *dst_ip, bool is_writev) {
   int ret;
   for (int i = 0; i < kNumTestFile; i++) {
-    unsigned char message[kPacketLen];
+    uint8_t message[kPacketLen];
     int payload_length;
     char name[kFileNameLen];
     memset(message, 0, sizeof(message));
@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
 
   // Test UDPTunSend(use memcpy)
   TestUDPTunSend(tun, dst_ip, false);
+
   // Test UDPTunSendv2(use writev)
   TestUDPTunSend(tun, dst_ip, true);
 
