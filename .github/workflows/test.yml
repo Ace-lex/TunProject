@@ -14,8 +14,8 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
     - name: Setup Python
-16    uses: actions/setup-python@v2
-17    with: python-version: "3.x"
+      uses: actions/setup-python@v2
+      with: python-version: "3.x"
     - name: Generate performance analysis files
       run: python3 ./profile/generate.py
     - name: Compile
