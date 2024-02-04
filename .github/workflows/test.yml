@@ -18,7 +18,7 @@ jobs:
       with: 
         python-version: "3.x"
     - name: Generate performance analysis files
-      run: python3 ./profile/generate.py
+      run: cd profile && python3 ./generate.py && cd ..
     - name: Compile
       run: cmake -B build && cmake --build build
     - name: Test
