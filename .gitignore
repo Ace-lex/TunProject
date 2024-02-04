@@ -54,3 +54,6 @@ dkms.conf
 # Binary file in this project
 build/
 example/payload/
+profile/small
+profile/medium
+profile/large

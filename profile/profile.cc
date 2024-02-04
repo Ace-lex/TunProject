@@ -12,7 +12,7 @@ const char *const kSrcIP =
     "10.10.10.1";  // The source ip of tested packets(refer the script)
 const char *const kDstIP = "192.168.0.39";
 const int kPathLen = 1024;    // The max file path length
-const int kPacketLen = 4096;  // The max packet length
+const int kPacketLen = 8192;  // The max packet length
 const int kSrcPort = 31233;   // The source port of tested packets
 const int kDestPort = 8080;   // The destination port of tested packets
 const int kInternal = 1;      // The send interval(second)
@@ -50,7 +50,7 @@ void MemcpyProfile(int tun, const char *dir_name) {
                        payload_length);
 
       // Ensure successful reception at the receiving end.
-      sleep(kInternal);
+      // sleep(kInternal);
     }
   }
 
@@ -90,7 +90,7 @@ void WritevProfile(int tun, const char *dir_name) {
                          payload_length);
 
       // Ensure successful reception at the receiving end.
-      sleep(kInternal);
+      // sleep(kInternal);
     }
   }
 
@@ -119,16 +119,16 @@ int main(int argc, char *argv[]) {
   MemcpyProfile(tun, dir_name);
   auto end = std::chrono::steady_clock ::now();
   int duration =
-      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+      std::chrono::duration_cast<std::chrono::microseconds>(end - start)
           .count();
-  printf("UDPTunSend using memcpy duration: %d\n", duration);
+  printf("UDPTunSend using memcpy duration(microseconds): %d\n", duration);
 
   // Profile UDPTunSend using writev
   start = std::chrono::steady_clock::now();
   WritevProfile(tun, dir_name);
   end = std::chrono::steady_clock ::now();
-  duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+  duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start)
                  .count();
-  printf("UDPTunSend using writev duration: %d\n", duration);
+  printf("UDPTunSend using writev duration(microseconds): %d\n", duration);
   return 0;
 }

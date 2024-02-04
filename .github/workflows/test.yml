@@ -13,8 +13,15 @@ jobs:
     steps:
     - name: Check out code
       uses: actions/checkout@v2
+    - name: Setup Python
+16    uses: actions/setup-python@v2
+17    with: python-version: "3.x"
+    - name: Generate performance analysis files
+      run: python3 ./profile/generate.py
     - name: Compile
       run: cmake -B build && cmake --build build
     - name: Test
-      run: cd build/test && sudo chmod +x ../script.sh && sudo chmod +x ./test.sh && sudo ./test.sh
+      run: cd build/test && sudo chmod +x ../script.sh && sudo chmod +x ./test.sh && sudo ./test.sh && cd ../..
+    - name: Performance analysis
+      run: cd build/profile && sudo chmod +x ./runprof.sh && sudo ./runprof.sh
     

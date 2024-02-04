@@ -40,20 +40,33 @@ cmake -B build
 cmake --build build
 ```
 
-## 关于UDPTunSend的设计
+## memcpy+write vs writev
 
-目前的API如下，用户需要传入tun设备的文件描述符，源目地址和端口信息以及载荷，这种设计方便用户调用，但每调用一次函数就需要在函数内开辟一块内存空间存放报文：
+操作系统: Debian 11.1.0 64bit 
 
-```C++
-int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
-               int dest_port, const u_int8_t *message, int payload_length);
-```
+Linux kernel: 5.10.0-23-amd64
 
-该API也有其他的设计方式，比如只传入存放报文的缓冲区指针buf，这种方法在一定程度上节省了空间(不需要为载荷开辟空间，buf只需在程序起始处开辟一个即可重复使用)，但不方便用户调用，用户需要自行将载荷放到buf的合适位置
+UDPTunSend使用memcpy将报文头部和载荷拼装起来，然后使用write系统调用写入虚拟网卡；UDPTunSendv2由writev拼装头部和载荷并写入网卡，下面对两种实现的性能进行对比
 
-```C++
-int UDPTunSend(int tun, const char *src_ip, const char *dest_ip, int src_port,
-               int dest_port, const u_int8_t *buf, int payload_length);
-```
+使用1kb, 4kb, 8kb大小的载荷进行测试，结合perf工具测得结果如下：
 
-最初的设计是用户需要传入buf指针和载荷指针，这种设计虽然不需要在函数内开辟内存空间，但是对于用户来说不如直接传入载荷方便。
+（1）使用UDPTunSend和UDPTunSendv2发送20个载荷为1kb的数据包，耗时与CPU占用如下所示
+
+|                       | UDPTunSend | UDPTunSendv2 |
+| --------------------- | ---------- | ------------ |
+| **耗时（$$\mu s$$）** | 232        | 185          |
+| **CPU占用**           | 4.97%      | 2.12%        |
+
+（2）使用UDPTunSend和UDPTunSendv2发送20个载荷为4kb的数据包，耗时与CPU占用如下所示
+
+|                       | **UDPTunSend** | **UDPTunSendv2** |
+| --------------------- | -------------- | ---------------- |
+| **耗时（$$\mu s$$）** | 512            | 326              |
+| **CPU占用**           | 6.30%          | 3.61%            |
+
+（3）使用UDPTunSend和UDPTunSendv2发送20个载荷为8kb的数据包，耗时与CPU占用如下所示
+
+|                       | UDPTunSend | UDPTunSendv2 |
+| --------------------- | ---------- | ------------ |
+| **耗时（$$\mu s$$）** | 602        | 447          |
+| **CPU占用**           | 8.44%      | 6.40%        |
