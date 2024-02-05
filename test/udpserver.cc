@@ -4,14 +4,14 @@
 
 #include "tun.h"
 
-const int kNumTestFile = 3;    // The number of test cases
-const int kRecvPort = 8080;    // The receiving port of socket
-const int kPacketLen = 4096;   // The max length of packet length
-const int kFileNameLen = 100;  // The max length of filename
+const int kNumTestFile = 3;                   // The number of test cases
+const int kRecvPort = 8080;                   // The receiving port of socket
+const int kPacketLen = 4096;                  // The max length of packet length
+const int kFileNameLen = 100;                 // The max length of filename
 const char *const kTestFilePrefix =
-    "./testfile/test";  // The script path to configure tun device
-const char *const kTestFileSuffix = ".bin";  // The testfile suffix
-const int kWaitTime = 10;                    // The timeout of test
+    "./testfile/test";                        // The script path to configure tun device
+const char *const kTestFileSuffix = ".bin";   // The testfile suffix
+const int kWaitTime = 10;                     // The timeout of test
 
 void RecvAndCheck(int sock_fd, struct sockaddr_in *client_addr, socklen_t len) {
   uint8_t example[kPacketLen];

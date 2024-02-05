@@ -2,18 +2,18 @@
 
 #include "tun.h"
 
-const int kNumTestFile = 3;  // The number of test cases
-const int kSrcPort = 31233;  // The source port of tested packets
-const int kDestPort = 8080;  // The destination port of tested packets
+const int kNumTestFile = 3;                             // The number of test cases
+const int kSrcPort = 31233;                             // The source port of tested packets
+const int kDestPort = 8080;                             // The destination port of tested packets
 const char *const kSrcIP =
-    "10.10.10.1";  // The source ip of tested packets(refer the script)
+    "10.10.10.1";                                       // The source ip of tested packets(refer the script)
 const char *const kScriptPath =
-    "../script.sh";  // The script path to configure tun device
+    "../script.sh";                                     // The script path to configure tun device
 const char *const kTestFilePrefix = "./testfile/test";  // The testfile path
 const char *const kTestFileSuffix = ".bin";             // The testfile suffix
-const int kInternal = 1;       // The send interval(second)
-const int kFileNameLen = 100;  // The max length of filename
-const int kPacketLen = 4096;   // The max length of packet length
+const int kInternal = 1;                                // The send interval(second)
+const int kFileNameLen = 100;                           // The max length of filename
+const int kPacketLen = 4096;                            // The max length of packet length
 
 void TestUDPTunSend(int tun, const char *dst_ip, bool is_writev) {
   int ret;

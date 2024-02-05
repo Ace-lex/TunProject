@@ -7,15 +7,15 @@
 #include "tun.h"
 
 const char *const kScriptPath =
-    "../script.sh";  // The script path to configure tun device
+    "../script.sh";            // The script path to configure tun device
 const char *const kSrcIP =
-    "10.10.10.1";  // The source ip of tested packets(refer the script)
+    "10.10.10.1";              // The source ip of tested packets(refer the script)
 const char *const kDstIP = "192.168.0.39";
-const int kPathLen = 1024;    // The max file path length
-const int kPacketLen = 8192;  // The max packet length
-const int kSrcPort = 31233;   // The source port of tested packets
-const int kDestPort = 8080;   // The destination port of tested packets
-const int kInternal = 1;      // The send interval(second)
+const int kPathLen = 1024;     // The max file path length
+const int kPacketLen = 32768;  // The max packet length
+const int kSrcPort = 31233;    // The source port of tested packets
+const int kDestPort = 8080;    // The destination port of tested packets
+const int kInternal = 1;       // The send interval(second)
 
 void MemcpyProfile(int tun, const char *dir_name) {
   DIR *dir;
@@ -49,7 +49,7 @@ void MemcpyProfile(int tun, const char *dir_name) {
       ret = UDPTunSend(tun, kSrcIP, kDstIP, kSrcPort, kDestPort, payload,
                        payload_length);
 
-      // Ensure successful reception at the receiving end.
+      
       // sleep(kInternal);
     }
   }
@@ -89,7 +89,7 @@ void WritevProfile(int tun, const char *dir_name) {
       ret = UDPTunSendv2(tun, kSrcIP, kDstIP, kSrcPort, kDestPort, payload,
                          payload_length);
 
-      // Ensure successful reception at the receiving end.
+      
       // sleep(kInternal);
     }
   }

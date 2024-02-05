@@ -1,11 +1,14 @@
 #!/bin/bash
 modprobe tun
  
-echo =====small payloads=====
-./profile small
+echo =====1kb payloads=====
+./profile prof_1kb
 
-echo =====medium payloads=====
-./profile medium
+echo =====4kb payloads=====
+./profile prof_4kb
 
-echo =====large payloads=====
-./profile large
+echo =====8kb payloads=====
+./profile prof_8kb
+
+echo =====16kb payloads=====
+./profile prof_16kb

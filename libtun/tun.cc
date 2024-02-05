@@ -6,13 +6,13 @@
 #include <sys/uio.h>
 
 const char *const kTunFileName = "/dev/net/tun";  // Tun device file path
-const int kIPID = 0xaabb;           // Identification of IP packets
-const int kFlagAndOffset = 0x0000;  // The IP flag
-const uint8_t kTTL = 64;            // The time to live of IP packets
-const int kPacketLen = 65536;        // The max length of the packet
-const int8_t kIPVersion = 4;        // IPv4
-const int8_t kTOS = 0;              // Type of Service(Routine)
-const int8_t kPacketPart = 3;  // Divide packet into 3 parts: IP + UDP + payload
+const int kIPID = 0xaabb;                         // Identification of IP packets
+const int kFlagAndOffset = 0x0000;                // The IP flag
+const uint8_t kTTL = 64;                          // The time to live of IP packets
+const int kPacketLen = 65536;                     // The max length of the packet
+const int8_t kIPVersion = 4;                      // IPv4
+const int8_t kTOS = 0;                            // Type of Service(Routine)
+const int8_t kPacketPart = 3;                     // Divide packet into 3 parts: IP + UDP + payload
 
 // Returns the tun file description of the device
 int TunCreate(char *dev, int flags) {

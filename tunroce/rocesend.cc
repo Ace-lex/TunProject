@@ -5,12 +5,12 @@
 const char *const kSrcIP = "10.10.10.1";    // Source IP of packets
 const char *const kDstIP = "192.168.0.39";  // Destination of packets(host)
 const int kSrcPort = 31233;                 // Source port of packets
-const int kDstPort = 4791;  // Destination port of packets(RoCEv2 is 4791)
-const int kPartitionKey = 0xffff;  // Partition key of RoCEv2 packets
-const int kDstQPN = 0x012c3f;      // Destination queue pair number
-const int kPacketNum = 0x123456;   // Packet sequence number
-const int kPSNMask = 0x00ffffff;   // PSN has only 24bits
-const int kQPNMask = 0x00ffffff;   // QPN has only 24bits
+const int kDstPort = 4791;                  // Destination port of packets(RoCEv2 is 4791)
+const int kPartitionKey = 0xffff;           // Partition key of RoCEv2 packets
+const int kDstQPN = 0x012c3f;               // Destination queue pair number
+const int kPacketNum = 0x123456;            // Packet sequence number
+const int kPSNMask = 0x00ffffff;            // PSN has only 24bits
+const int kQPNMask = 0x00ffffff;            // QPN has only 24bits
 
 const int kQueueKey = 0x1ee7a330;
 const int kSrcQP = 0x012c41;  // Source QP

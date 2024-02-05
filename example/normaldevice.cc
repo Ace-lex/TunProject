@@ -15,7 +15,7 @@
 const int kRecvPort = 8080;   // The recving port of socket
 const int kPacketLen = 4096;  // The max length of packet
 const char *const kDestIP =
-    "10.10.10.1";  // The destination IP of packets(tun device IP)
+    "10.10.10.1";             // The destination IP of packets(tun device IP)
 
 int FileSize(const char *filename) {
   struct stat stat_buf;

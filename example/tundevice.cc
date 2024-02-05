@@ -4,13 +4,13 @@
 #include "tun.h"
 
 const char *const kDefaultMessage =
-    "reply by tun";  // The default payload of reply packets(if payload file is
-                     // not provided)
-const int kIPAddrLen = 15;  // Length of IP address in dotted decimal notation"
+    "reply by tun";                  // The default payload of reply packets(if payload file is
+                                     // not provided)
+const int kIPAddrLen = 15;           // Length of IP address in dotted decimal notation"
 const char *kScriptPath =
-    "../script.sh";           // The script path to configure tun device
-const int kIPHeaderLen = 20;  // IP header length(usually)
-const int kPacketLen = 4096;  // The max length of packet
+    "../script.sh";                  // The script path to configure tun device
+const int kIPHeaderLen = 20;         // IP header length(usually)
+const int kPacketLen = 4096;         // The max length of packet
 
 int main(int argc, char *argv[]) {
   int tun, ret;
