@@ -13,16 +13,16 @@ const int kPSNMask = 0x00ffffff;            // PSN has only 24bits
 const int kQPNMask = 0x00ffffff;            // QPN has only 24bits
 
 const int kQueueKey = 0x1ee7a330;
-const int kSrcQP = 0x012c41;  // Source QP
-const int kIBHeaderLen = 20;  // Infiniband header length
-const uint8_t kOpcode = 100;  // opcode(UD Send)
+const int kSrcQP = 0x012c41;                // Source QP
+const int kIBHeaderLen = 20;                // Infiniband header length
+const uint8_t kOpcode = 100;                // opcode(UD Send)
 const char *const kPayloadFilePath =
-    "./payload/test.bin";  // Path of the payload file
+    "./payload/test.bin";                   // Path of the payload file
 const char *kScriptPath =
-    "../script.sh";               // The script path to configure tun device
-const int kInternal = 1;          // Send interval(second)
-const int kPacketLen = 4096;      // The max length of the packet
-const int kPseudoHeaderLen = 12;  // The length of udp pseudo header
+    "../script.sh";                         // The script path to configure tun device
+const int kInternal = 1;                    // Send interval(second)
+const int kPacketLen = 4096;                // The max length of the packet
+const int kPseudoHeaderLen = 12;            // The length of udp pseudo header
 
 // the struct of BTH
 struct rxe_bth {

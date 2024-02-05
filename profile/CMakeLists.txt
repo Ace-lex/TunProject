@@ -2,8 +2,8 @@ add_executable(profile profile.cc)
 
 target_link_libraries(profile PRIVATE tun)
 
-file(COPY prof_1kb DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY prof_4kb DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY prof_8kb DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY prof_16kb DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB profile_folders "./prof*")
+foreach(folder ${profile_folders})
+    file(COPY ${folder} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach()
 file(COPY runprof.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

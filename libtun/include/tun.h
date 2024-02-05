@@ -26,11 +26,11 @@ struct pseudo_hdr {
 
   u_int32_t dst_ip;  // destination ip address
 
-  char mbz;  // zero
+  char mbz;          // zero
 
-  char protocol;  // protocol field
+  char protocol;     // protocol field
 
-  short int len;  // length of udp packet
+  short int len;     // length of udp packet
 };
 
 int TunCreate(char *dev, int flags);

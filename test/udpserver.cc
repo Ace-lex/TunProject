@@ -1,48 +1,64 @@
 // Receive the packets sended by tun and check the correctness
 
+#include <dirent.h>
 #include <sys/time.h>
 
 #include "tun.h"
 
-const int kNumTestFile = 3;                   // The number of test cases
-const int kRecvPort = 8080;                   // The receiving port of socket
-const int kPacketLen = 4096;                  // The max length of packet length
-const int kFileNameLen = 100;                 // The max length of filename
-const char *const kTestFilePrefix =
-    "./testfile/test";                        // The script path to configure tun device
-const char *const kTestFileSuffix = ".bin";   // The testfile suffix
-const int kWaitTime = 10;                     // The timeout of test
+const int kNumTestFile = 3;                  // The number of test cases
+const int kRecvPort = 8080;                  // The receiving port of socket
+const int kPacketLen = 4096;                 // The max length of packet length
+const int kFileNameLen = 100;                // The max length of filename
+const char *const kTestFileDir =
+    "./testfile";                            // The script path to configure tun device
+const char *const kTestFileSuffix = ".bin";  // The testfile suffix
+const int kWaitTime = 10;                    // The timeout of test
 
-void RecvAndCheck(int sock_fd, struct sockaddr_in *client_addr, socklen_t len) {
+void RecvAndCheck(const char *dir_name, int sock_fd,
+                  struct sockaddr_in *client_addr, socklen_t len) {
   uint8_t example[kPacketLen];
   uint8_t buffer[kPacketLen];
-  char name[kFileNameLen];
   int n;
-  for (int i = 0; i < kNumTestFile; i++) {
-    // Receive the packets
-    memset(example, 0, sizeof(example));
-    n = recvfrom(sock_fd, buffer, kPacketLen, MSG_WAITALL,
-                 (struct sockaddr *)client_addr,
-                 &len);  // Receiving packets successfully indicates that the IP
-                         // and UDP packet formats are correct.
 
-    // Read the check file
-    sprintf(name, "%s%d%s", kTestFilePrefix, i, kTestFileSuffix);
-    FILE *fp = fopen(name, "rb");
-    int file_length;
-    file_length = FileSize(name);
-    fread(example, 1, file_length, fp);
-    fclose(fp);
+  DIR *dir;
+  struct dirent *entry;
+  char path[kFileNameLen];
 
-    // Check length correction
-    assert(n == file_length);
+  // Open payload directory
+  dir = opendir(dir_name);
+  
+  if (dir == NULL) {
+    perror("Error opening directory");
+    exit(EXIT_FAILURE);
+  }
 
-    // Check payload correction
-    for (int j = 0; j < file_length; j++) {
-      assert(example[j] == buffer[j]);
+  while ((entry = readdir(dir)) != NULL) {
+    if (entry->d_type == DT_REG) {
+      // Receive the packets
+      memset(example, 0, sizeof(example));
+      n = recvfrom(sock_fd, buffer, kPacketLen, MSG_WAITALL,
+                   (struct sockaddr *)client_addr,
+                   &len);  // Receiving packets successfully indicates that the
+                           // IP and UDP packet formats are correct.
+
+      // Read the check file
+      sprintf(path, "%s/%s", dir_name, entry->d_name);
+      FILE *fp = fopen(path, "rb");
+      int file_length;
+      file_length = FileSize(path);
+      fread(example, 1, file_length, fp);
+      fclose(fp);
+
+      // Check length correction
+      assert(n == file_length);
+
+      // Check payload correction
+      for (int j = 0; j < file_length; j++) {
+        assert(example[j] == buffer[j]);
+      }
+
+      printf("Received %d bytes, test passed\n", n);
     }
-
-    printf("Received %d bytes, test%d passed\n", n, i);
   }
 }
 
@@ -66,11 +82,11 @@ int main() {
   // correctness
   printf("====UDPTunSend(use memcpy)====\n");
   fflush(stdout);
-  RecvAndCheck(sock_fd, &client_addr, len);
+  RecvAndCheck(kTestFileDir, sock_fd, &client_addr, len);
 
   printf("====UDPTunSend(use writev)====\n");
   fflush(stdout);
-  RecvAndCheck(sock_fd, &client_addr, len);
+  RecvAndCheck(kTestFileDir, sock_fd, &client_addr, len);
 
   return 0;
 }
