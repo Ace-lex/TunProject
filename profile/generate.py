@@ -35,3 +35,6 @@ if __name__ == "__main__":
 
     # Generate 16kb payloads
     generate_perf_directory(PROF_PREFIX, 16, FILE_NUM)
+
+    # Generate 32kb payloads
+    generate_perf_directory(PROF_PREFIX, 32, FILE_NUM)
